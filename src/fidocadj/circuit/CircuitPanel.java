@@ -1282,6 +1282,11 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
         DrawingModel model = getDrawingModel();
         int minX = Integer.MAX_VALUE;
         int minY = Integer.MAX_VALUE;
+        
+        final int gridStep = getMapCoordinates().getXGridStep();
+        
+        final int MARGIN_GRID_CELLS = 2;
+        final int MARGIN = MARGIN_GRID_CELLS * gridStep;
 
         // Find the minimum (most negative) ..
         // x and y coordinates among all primitives
@@ -1299,8 +1304,11 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
         // If minimum x or y coordinates are negative,
         // calculate the necessary translation
         if (minX < 0 || minY < 0) {
-            int deltaX = minX < 0 ? -minX : 0;
-            int deltaY = minY < 0 ? -minY : 0;
+            int rawDeltaX = minX < 0 ? -minX + MARGIN : MARGIN;
+            int rawDeltaY = minY < 0 ? -minY + MARGIN : MARGIN;
+            
+            int deltaX = ((rawDeltaX + gridStep - 1) / gridStep) * gridStep;
+            int deltaY = ((rawDeltaY + gridStep - 1) / gridStep) * gridStep;
 
             // Apply the translation to all primitives
             for (GraphicPrimitive gp : model.getPrimitiveVector()) {
@@ -1331,7 +1339,7 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
             // Check each virtual point of the primitive
             for (PointG point : gp.virtualPoint) {
                 // If any point is non-negative, set allNegative to false
-                if (point.x >= 0 || point.y >= 0) {
+                if (point.x >= 0 && point.y >= 0) {
                     allNegative = false;
                     break; // No need to check further, move to next primitive
                 }
