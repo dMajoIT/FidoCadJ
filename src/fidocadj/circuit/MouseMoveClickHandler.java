@@ -98,11 +98,12 @@ public class MouseMoveClickHandler implements MouseMotionListener,
 
         // Normal continuous move (for drawing new primitives)
         if (continuosMoveActions.continuosMove(
-                circuitPanel.getMapCoordinates(), xa, ya, toggle)) {
+                circuitPanel.getMapCoordinates(), xa, ya, toggle))
+        {
             circuitPanel.repaint();
         }
     }
-    
+
     /** Check if the "toggle" keyboard button is pressed during the mouse
         operation. Toggle may be Control or Meta, depending on the operating
         system.
@@ -127,7 +128,7 @@ public class MouseMoveClickHandler implements MouseMotionListener,
 
         int px=evt.getX();
         int py=evt.getY();
-        
+
         // Handle Move command mode - just consume the event
         if (continuosMoveActions.isMovingSelected()) {
             return;
@@ -138,16 +139,17 @@ public class MouseMoveClickHandler implements MouseMotionListener,
         circuitPanel.getRuler().setRulerEnd(px, py);
         boolean toggle = getToggle(evt);
 
-        if(continuosMoveActions.actionSelected == 
-                ElementsEdtActions.SELECTION && 
+        if(continuosMoveActions.actionSelected ==
+                ElementsEdtActions.SELECTION &&
                 (evt.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK)==0 &&
                 !evt.isShiftDown())
         {
-            handleActions.dragHandleStart(px, py, 
+            handleActions.dragHandleStart(px, py,
                     editorActions.getSelectionTolerance(),
                     toggle, circuitPanel.getMapCoordinates());
-        } else if(continuosMoveActions.actionSelected == 
-                    ElementsEdtActions.SELECTION){
+        } else if(continuosMoveActions.actionSelected ==
+                    ElementsEdtActions.SELECTION)
+        {
             // Right click during selection
             circuitPanel.getRuler().setActive(true);
         }
@@ -170,7 +172,7 @@ public class MouseMoveClickHandler implements MouseMotionListener,
         MyTimer mt = new MyTimer();
         int px=evt.getX();
         int py=evt.getY();
-        
+
         // Handle Move command mode - update positions during drag
         if (continuosMoveActions.isMovingSelected()) {
             continuosMoveActions.updateMovePositions(
@@ -190,7 +192,7 @@ public class MouseMoveClickHandler implements MouseMotionListener,
             circuitPanel.repaint();
             return;
         }
-        
+
         if (continuosMoveActions.actionSelected == ElementsEdtActions.HAND) {
             return;
         }
@@ -221,7 +223,7 @@ public class MouseMoveClickHandler implements MouseMotionListener,
         int px=evt.getX();
         int py=evt.getY();
         MapCoordinates cs=circuitPanel.getMapCoordinates();
-        
+
         // Handle Move command mode - confirm move on release
         if (continuosMoveActions.isMovingSelected()) {
             if (evt.getButton() == MouseEvent.BUTTON1) {
@@ -230,7 +232,7 @@ public class MouseMoveClickHandler implements MouseMotionListener,
             }
             return;
         }
-        
+
         boolean button3 = false;
         boolean toggle = getToggle(evt);
 
@@ -338,7 +340,7 @@ public class MouseMoveClickHandler implements MouseMotionListener,
     {
         circuitPanel.setCursor(
                 Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        
+
         if(continuosMoveActions.successiveMove) {
             continuosMoveActions.successiveMove = false;
             circuitPanel.repaint();

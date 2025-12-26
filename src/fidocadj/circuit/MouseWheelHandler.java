@@ -41,22 +41,22 @@ public class MouseWheelHandler implements KeyListener, MouseWheelListener
 
         updateListenerState();
     }
-    
+
     /**
      * Updates the mouse wheel listener state based on current settings.
      * This method should be called whenever enableKeyForZoom setting changes.
-     * 
+     *
      * Behavior:
-     * - If enableKeyForZoom is true: 
+     * - If enableKeyForZoom is true:
      *      listener is always active (no key required)
-     * - If enableKeyForZoom is false: 
+     * - If enableKeyForZoom is false:
      *      listener is only active when Ctrl key is pressed
      */
     public void updateListenerState()
     {
         boolean shouldHaveListener = !circuitPanel.isEnabledKeyForZoom();
         boolean hasListener = hasMouseWheelListener();
-        
+
         if (shouldHaveListener && !hasListener) {
             // Add listener if zoom without key is ...
             // enabled and listener is not present
@@ -67,7 +67,7 @@ public class MouseWheelHandler implements KeyListener, MouseWheelListener
             circuitPanel.removeMouseWheelListener(this);
         }
     }
-    
+
     /** Intercepts the moment when the Ctrl key is pressed.
         When enableKeyForZoom is false, the wheel listener is added
         only when Ctrl key is held down.
@@ -78,13 +78,14 @@ public class MouseWheelHandler implements KeyListener, MouseWheelListener
     {
         // Only handle dynamic listener addition when key-for-zoom is disabled
         if (circuitPanel.isEnabledKeyForZoom()) {
-            if (e.getKeyCode() == KeyEvent.VK_CONTROL && 
-                    !hasMouseWheelListener()) {
+            if (e.getKeyCode() == KeyEvent.VK_CONTROL &&
+                    !hasMouseWheelListener())
+            {
                 circuitPanel.addMouseWheelListener(this);
             }
         }
     }
-    
+
     /** Intercepts the moment when the Ctrl key is released.
         When enableKeyForZoom is false, the wheel listener is removed
         when Ctrl key is released.
@@ -95,13 +96,14 @@ public class MouseWheelHandler implements KeyListener, MouseWheelListener
     {
         // Only handle dynamic listener removal when key-for-zoom is disabled
         if (circuitPanel.isEnabledKeyForZoom()) {
-            if (e.getKeyCode() == KeyEvent.VK_CONTROL && 
-                    hasMouseWheelListener()) {
+            if (e.getKeyCode() == KeyEvent.VK_CONTROL &&
+                    hasMouseWheelListener())
+            {
                 circuitPanel.removeMouseWheelListener(this);
             }
         }
     }
-    
+
     /** Required by the KeyListener interface.
         @param e the key event
     */
@@ -110,7 +112,7 @@ public class MouseWheelHandler implements KeyListener, MouseWheelListener
     {
         // do nothing
     }
-    
+
     /** Determines whether the circuit panel has this class as a wheel listener.
         @return true if this handler is registered as a mouse wheel listener
     */
@@ -124,7 +126,7 @@ public class MouseWheelHandler implements KeyListener, MouseWheelListener
         }
         return false;
     }
-    
+
     /** Handle zoom event via the wheel.
         @param e the mouse wheel event
     */
@@ -134,7 +136,7 @@ public class MouseWheelHandler implements KeyListener, MouseWheelListener
         circuitPanel.changeZoomByStep(
                 e.getWheelRotation() < 0, e.getX(), e.getY(), 1.1);
     }
-    
+
     /** Cleanup method to properly remove listeners.
         Should be called when the handler is no longer needed.
     */

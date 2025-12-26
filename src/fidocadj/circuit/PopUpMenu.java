@@ -134,7 +134,7 @@ public class PopUpMenu implements ActionListener
         editDuplicate = new JMenuItem(Globals.messages.getString("Duplicate"));
         editDuplicate.setIcon(
                 Globals.loadIcon("/icons/menu_icons/duplicate.png"));
-        
+
         editMove = new JMenuItem(Globals.messages.getString("Move"));
         editMove.setIcon(Globals.loadIcon("/icons/menu_icons/move.png"));
 
@@ -285,8 +285,9 @@ public class PopUpMenu implements ActionListener
         circuitPanel.getActionMap().put(actionString, new AbstractAction() {
             @Override public void actionPerformed(ActionEvent ignored)
             {
-                if (actionString.equals("selection") && 
-                    continuosMoveActions.isMovingSelected()) {
+                if (actionString.equals("selection") &&
+                    continuosMoveActions.isMovingSelected())
+                {
                     continuosMoveActions.cancelMove();
                     circuitPanel.repaint();
                     return;
@@ -338,7 +339,7 @@ public class PopUpMenu implements ActionListener
         registerAction("connection", 'c', ElementsEdtActions.CONNECTION);
         registerAction("pcbline", 'i', ElementsEdtActions.PCB_LINE);
         registerAction("pcbpad", 'z', ElementsEdtActions.PCB_PAD);
-        
+
         final String moveKey = "move_key";
 
         circuitPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -351,8 +352,9 @@ public class PopUpMenu implements ActionListener
         circuitPanel.getActionMap().put(moveKey, new AbstractAction() {
             @Override public void actionPerformed(ActionEvent ignored)
             {
-                if (selectionActions.getFirstSelectedPrimitive() != null && 
-                    !continuosMoveActions.isMovingSelected()) {
+                if (selectionActions.getFirstSelectedPrimitive() != null &&
+                    !continuosMoveActions.isMovingSelected())
+                {
                     continuosMoveActions.startMovingSelected(
                             circuitPanel.getMapCoordinates());
                     circuitPanel.repaint();
@@ -404,7 +406,7 @@ public class PopUpMenu implements ActionListener
                 }
             }
         });
-        
+
         final String left = "lleft";
          // left key
         circuitPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -553,10 +555,10 @@ public class PopUpMenu implements ActionListener
                 if(selectionActions.getFirstSelectedPrimitive()
                     instanceof PrimitivePolygon)
                 {
-                    PrimitivePolygon poly = 
+                    PrimitivePolygon poly =
                             (PrimitivePolygon)selectionActions
                                     .getFirstSelectedPrimitive();
-                    
+
                     poly.removePoint(circuitPanel.getMapCoordinates()
                             .unmapXnosnap(getMenuX()),
                         circuitPanel.getMapCoordinates()
@@ -591,7 +593,7 @@ public class PopUpMenu implements ActionListener
                                 .unmapYsnap(getMenuY()));
                     undoActions.saveUndoState();
                     circuitPanel.repaint();
-                } else if(selectionActions.getFirstSelectedPrimitive() 
+                } else if(selectionActions.getFirstSelectedPrimitive()
                         instanceof PrimitiveComplexCurve)
                 {
                     PrimitiveComplexCurve poly=

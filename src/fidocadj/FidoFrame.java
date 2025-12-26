@@ -445,7 +445,7 @@ public final class FidoFrame extends JFrame implements
         MapCoordinates mc=circuitPanel.getMapCoordinates();
         double z=Double.parseDouble(SettingsManager.get("CURRENT_ZOOM","4.0"));
         mc.setMagnitudes(z,z);
-        
+
         circuitPanel.setEnableKeyForZoom(
                 SettingsManager.getBoolean("ZOOM_KEY", true));
     }
@@ -820,7 +820,7 @@ public final class FidoFrame extends JFrame implements
                     "STROKE_SIZE_OVAL", Globals.lineWidthCircles);
         Globals.diameterConnection = SettingsManager.getDouble(
                     "CONNECTION_SIZE", Globals.diameterConnection);
-        
+
         circuitPanel.setEnableKeyForZoom(
                 SettingsManager.getBoolean("ZOOM_KEY", true));
 
@@ -839,7 +839,7 @@ public final class FidoFrame extends JFrame implements
         if(circuitPanel.getDrawingModel().isEmpty())
             return;
         //double oldz=cc.getMapCoordinates().getXMagnitude();
-        
+
         // Check for ghost primitives (hidden outside the drawing area)
         if (circuitPanel.checkGhostPrimitives()) {
             int response = JOptionPane.showConfirmDialog(this,

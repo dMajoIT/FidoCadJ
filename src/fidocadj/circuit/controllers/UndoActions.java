@@ -68,7 +68,7 @@ public class UndoActions implements UndoActorListener
         tempDir=new Vector<String>();
         cl =null;
     }
-    
+
     /** Check if undo operation is available.
         @return true if there are actions that can be undone.
     */
@@ -76,7 +76,7 @@ public class UndoActions implements UndoActorListener
     {
         return um.canUndo();
     }
-    
+
     /** Check if redo operation is available.
         @return true if there are actions that can be redone.
     */
@@ -84,7 +84,7 @@ public class UndoActions implements UndoActorListener
     {
         return um.canRedo();
     }
-    
+
     /** Undo the last editing action
     */
     public void undo()

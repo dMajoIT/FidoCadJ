@@ -104,7 +104,7 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
 
     // Default grid lines color
     private ColorSwing gridLinesColor;
-    
+
     // Use key for zoom
     private boolean enableKeyForZoom;
 
@@ -1282,9 +1282,9 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
         DrawingModel model = getDrawingModel();
         int minX = Integer.MAX_VALUE;
         int minY = Integer.MAX_VALUE;
-        
+
         final int gridStep = getMapCoordinates().getXGridStep();
-        
+
         final int MARGIN_GRID_CELLS = 2;
         final int MARGIN = MARGIN_GRID_CELLS * gridStep;
 
@@ -1306,7 +1306,7 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
         if (minX < 0 || minY < 0) {
             int rawDeltaX = minX < 0 ? -minX + MARGIN : MARGIN;
             int rawDeltaY = minY < 0 ? -minY + MARGIN : MARGIN;
-            
+
             int deltaX = ((rawDeltaX + gridStep - 1) / gridStep) * gridStep;
             int deltaY = ((rawDeltaY + gridStep - 1) / gridStep) * gridStep;
 
@@ -1357,7 +1357,8 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
     /**
      * @return the enableKeyForZoom
      */
-    public boolean isEnabledKeyForZoom() {
+    public boolean isEnabledKeyForZoom()
+    {
         return enableKeyForZoom;
     }
 
@@ -1365,11 +1366,11 @@ public class CircuitPanel extends JPanel implements ChangeSelectedLayer,
      * Sets whether zoom with mouse wheel requires holding Ctrl key.
      * When this setting changes, the mouse wheel listener state is ..
      * updated accordingly.
-     * 
+     *
      * @param enableKeyForZoom true to enable wheel zoom without Ctrl key,
      *                         false to require Ctrl key for wheel zoom
      */
-    public void setEnableKeyForZoom(boolean enableKeyForZoom) 
+    public void setEnableKeyForZoom(boolean enableKeyForZoom)
     {
         this.enableKeyForZoom = enableKeyForZoom;
 

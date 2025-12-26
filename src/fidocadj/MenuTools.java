@@ -23,9 +23,9 @@ import fidocadj.geom.ChangeCoordinatesListener;
 
 /**
  * MenuTools - Main menu creation and handling class for FidoCadJ.
- * 
- * <p>This class is responsible for creating and managing all menus in the 
- * FidoCadJ application. It provides methods to create menus, handle menu 
+ *
+ * <p>This class is responsible for creating and managing all menus in the
+ * FidoCadJ application. It provides methods to create menus, handle menu
  * events, and dynamically update menu item states based on application state.
  * </p>
  * <pre>
@@ -54,24 +54,25 @@ public class MenuTools implements MenuListener
 {
     // Constants
     private static final String MENU_ICONS_PATH = "/icons/menu_icons/";
-    
+
     // View menu items
     private JCheckBoxMenuItem libs = new JCheckBoxMenuItem();
-    
+
     // Menu references
     private JMenu editMenu;
-    
+
     // Circuit panel reference for dynamic updates
     private CircuitPanel circuitPanel;
-    
+
     // Menu items holder for organized access
     private final MenuItemsHolder menuItems = new MenuItemsHolder();
-    
+
     // Action handlers map for action dispatching
-    private final Map<String, MenuActionHandler> 
+    private final Map<String, MenuActionHandler>
             actionHandlers = new HashMap<>();
-    
-    private static class MenuItemsHolder {
+
+    private static class MenuItemsHolder
+    {
         // Edit menu items
         JMenuItem editUndo;
         JMenuItem editRedo;
@@ -84,7 +85,7 @@ public class MenuTools implements MenuListener
         JMenuItem editMove;
         JMenuItem editRotate;
         JMenuItem editMirror;
-        
+
         // Alignment menu items
         JMenuItem alignLeftSelected;
         JMenuItem alignRightSelected;
@@ -92,18 +93,19 @@ public class MenuTools implements MenuListener
         JMenuItem alignBottomSelected;
         JMenuItem alignHorizontalCenterSelected;
         JMenuItem alignVerticalCenterSelected;
-        
+
         // Distribution menu items
         JMenuItem distributeHorizontallySelected;
         JMenuItem distributeVerticallySelected;
-        
+
         /**
          * Get all selection-dependent menu items as an array.
          * These items should be enabled only when something is selected.
-         * 
+         *
          * @return Array of menu items that depend on selection state
          */
-        JMenuItem[] getSelectionDependentItems() {
+        JMenuItem[] getSelectionDependentItems()
+        {
             return new JMenuItem[] {
                 editCut, editCopy, editCopySplit, editCopyImage,
                 editDuplicate, editMove, editRotate, editMirror,
@@ -114,32 +116,34 @@ public class MenuTools implements MenuListener
             };
         }
     }
-    
+
     /**
      * Functional interface for menu action handlers.
      * Allows lambda expressions to be used for handling menu actions.
      */
     @FunctionalInterface
-    private interface MenuActionHandler {
+    private interface MenuActionHandler
+    {
         /**
          * Handle a menu action.
-         * 
+         *
          * @param fidoFrame The main application frame
          * @param coordL The coordinate listener for status messages
          */
         void handle(FidoFrame fidoFrame, ChangeCoordinatesListener coordL);
     }
-    
+
     /**
      * Constructor - initializes action handlers.
      */
-    public MenuTools() {
+    public MenuTools()
+    {
         initializeActionHandlers();
     }
 
     /**
      * Create all the menus and associate to them all the needed listeners.
-     * 
+     *
      * @param al the action listener to associate to the menu elements
      * @return the complete menu bar
      */
@@ -165,9 +169,9 @@ public class MenuTools implements MenuListener
 
     /**
      * Set the circuit panel reference for dynamic menu updates.
-     * This reference is used to query selection state and 
+     * This reference is used to query selection state and
      * undo/redo availability.
-     * 
+     *
      * @param cp the CircuitPanel instance
      */
     public void setCircuitPanel(CircuitPanel cp)
@@ -178,7 +182,7 @@ public class MenuTools implements MenuListener
     /**
      * MenuListener implementation - called when a menu is selected.
      * Updates menu items state based on current selection and undo/redo status.
-     * 
+     *
      * @param evt the menu event object
      */
     @Override
@@ -192,7 +196,7 @@ public class MenuTools implements MenuListener
 
     /**
      * MenuListener implementation - called when a menu is deselected.
-     * 
+     *
      * @param evt the menu event object
      */
     @Override
@@ -203,7 +207,7 @@ public class MenuTools implements MenuListener
 
     /**
      * MenuListener implementation - called when a menu is canceled.
-     * 
+     *
      * @param evt the menu event object
      */
     @Override
@@ -218,43 +222,43 @@ public class MenuTools implements MenuListener
      * is opened to ensure all items reflect the current application state.
      */
     private void updateEditMenuState()
-    {      
+    {
         if (circuitPanel == null) {
             // If no circuit panel, disable all editing operations
             disableAllEditItems();
             return;
         }
-        
+
         try {
-            SelectionActions selectionActions = 
+            SelectionActions selectionActions =
                     circuitPanel.getSelectionActions();
-            
+
             boolean somethingSelected = false;
-            
+
             if (selectionActions != null) {
-                somethingSelected = 
+                somethingSelected =
                         selectionActions.getFirstSelectedPrimitive() != null;
             }
-            
+
             // Enable/disable selection-dependent items
             updateSelectionDependentItems(somethingSelected);
-            
+
             // Check clipboard for paste operation
             updatePasteItemState();
-            
+
             // Check undo/redo availability
             updateUndoRedoItemsState();
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             // If any error occurs, disable all items for safety
             disableAllEditItems();
         }
     }
-    
+
     /**
      * Update the enabled state of all selection-dependent menu items.
-     * 
+     *
      * @param enabled true if items should be enabled, false otherwise
      */
     private void updateSelectionDependentItems(boolean enabled)
@@ -265,7 +269,7 @@ public class MenuTools implements MenuListener
             }
         }
     }
-    
+
     /**
      * Update the paste menu item state based on clipboard content.
      * Checks if there is valid content in the clipboard that can be pasted.
@@ -275,17 +279,17 @@ public class MenuTools implements MenuListener
         try {
             TextTransfer textTransfer = new TextTransfer();
             String clipboardContent = textTransfer.getClipboardContents();
-            boolean pasteEnabled = clipboardContent != null && 
+            boolean pasteEnabled = clipboardContent != null &&
                                !"".equals(clipboardContent);
             menuItems.editPaste.setEnabled(pasteEnabled);
         } catch (Exception e) {
             menuItems.editPaste.setEnabled(false);
         }
     }
-    
+
     /**
      * Update undo and redo menu items state based on availability.
-     * Queries the undo actions controller to determine if undo/redo 
+     * Queries the undo actions controller to determine if undo/redo
      * are possible.
      */
     private void updateUndoRedoItemsState()
@@ -306,64 +310,65 @@ public class MenuTools implements MenuListener
             menuItems.editRedo.setEnabled(false);
         }
     }
-    
+
     /**
      * Disable all edit menu items (safety fallback).
-     * This method is called when an error occurs or when there's no circuit panel.
+     * This method is called when an error occurs or when there's no circuit
+     * panel.
      */
     private void disableAllEditItems()
     {
         if (menuItems.editUndo != null) menuItems.editUndo.setEnabled(false);
         if (menuItems.editRedo != null) menuItems.editRedo.setEnabled(false);
         if (menuItems.editPaste != null) menuItems.editPaste.setEnabled(false);
-        
+
         // Disable all selection-dependent items
         updateSelectionDependentItems(false);
     }
 
     /**
      * Create the main File menu with all file operations.
-     * 
+     *
      * @param al the action listener to associate to the menu items
      * @return the File menu
      */
     private JMenu createFileMenu(ActionListener al)
     {
         JMenu fileMenu = new JMenu(Globals.messages.getString("File"));
-        
+
         // Create menu items using builder pattern for consistency
         JMenuItem fileNew = createMenuItem("New", "new.png")
             .withShortcut(KeyEvent.VK_N, Globals.shortcutKey)
             .build();
-            
+
         JMenuItem fileOpen = createMenuItem("Open", "open.png")
             .withShortcut(KeyEvent.VK_O, Globals.shortcutKey)
             .build();
-            
+
         JMenuItem fileSave = createMenuItem("Save", "save.png")
             .withShortcut(KeyEvent.VK_S, Globals.shortcutKey)
             .build();
-            
+
         JMenuItem fileSaveName = createMenuItem("SaveName", "save_name.png")
-            .withShortcut(KeyEvent.VK_S, 
+            .withShortcut(KeyEvent.VK_S,
                 Globals.shortcutKey | InputEvent.SHIFT_DOWN_MASK)
             .build();
-            
-        JMenuItem fileSaveNameSplit = createMenuItem("Save_split", 
+
+        JMenuItem fileSaveNameSplit = createMenuItem("Save_split",
             "save_split.png").build();
-            
+
         JMenuItem fileExport = createMenuItem("Export", "export.png")
             .withShortcut(KeyEvent.VK_E, Globals.shortcutKey)
             .build();
-            
+
         JMenuItem filePrint = createMenuItem("Print", "print.png")
             .withShortcut(KeyEvent.VK_P, Globals.shortcutKey)
             .build();
-            
+
         JMenuItem fileClose = createMenuItem("Close", "close.png")
             .withShortcut(KeyEvent.VK_W, Globals.shortcutKey)
             .build();
-            
+
         JMenuItem options = createMenuItem("Circ_opt", "options.png").build();
 
         // Add action listeners
@@ -396,7 +401,7 @@ public class MenuTools implements MenuListener
             fileMenu.add(options);
             fileMenu.addSeparator();
         }
-        
+
         fileMenu.add(fileClose);
 
         return fileMenu;
@@ -404,30 +409,33 @@ public class MenuTools implements MenuListener
 
     /**
      * Create the Edit main menu with all editing operations.
-     * This includes undo/redo, cut/copy/paste, transformations, 
+     * This includes undo/redo, cut/copy/paste, transformations,
      * and alignment tools.
-     * 
+     *
      * @param al the action listener to associate to the menu items
      * @return the Edit menu
      */
     private JMenu createEditMenu(ActionListener al)
     {
         editMenu = new JMenu(Globals.messages.getString("Edit_menu"));
-        
+
         // Add popup menu listener to update menu state when opened
         editMenu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
             @Override
-            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e)
+            {
                 updateEditMenuState();
             }
-            
+
             @Override
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
+            {
                 // Does nothing
             }
-            
+
             @Override
-            public void popupMenuCanceled(PopupMenuEvent e) {
+            public void popupMenuCanceled(PopupMenuEvent e)
+            {
                 // Does nothing
             }
         });
@@ -436,36 +444,36 @@ public class MenuTools implements MenuListener
         menuItems.editUndo = createMenuItem("Undo", "undo.png")
             .withShortcut(KeyEvent.VK_Z, Globals.shortcutKey)
             .build();
-            
+
         menuItems.editRedo = createMenuItem("Redo", "redo.png")
-            .withShortcut(KeyEvent.VK_Z, 
+            .withShortcut(KeyEvent.VK_Z,
                 Globals.shortcutKey | InputEvent.SHIFT_DOWN_MASK)
             .build();
-        
+
         // Create clipboard operation items
         menuItems.editCut = createMenuItem("Cut", "cut.png")
             .withShortcut(KeyEvent.VK_X, Globals.shortcutKey)
             .build();
-            
+
         menuItems.editCopy = createMenuItem("Copy", "copy.png")
             .withShortcut(KeyEvent.VK_C, Globals.shortcutKey)
             .build();
-            
-        menuItems.editCopySplit = 
+
+        menuItems.editCopySplit =
                 createMenuItem("Copy_split", "copy_split.png")
             .withShortcut(KeyEvent.VK_M, Globals.shortcutKey)
             .build();
-            
-        menuItems.editCopyImage = 
+
+        menuItems.editCopyImage =
                 createMenuItem("Copy_as_image", "copy_image.png")
             .withShortcut(KeyEvent.VK_I, Globals.shortcutKey)
             .build();
-            
+
         menuItems.editPaste = createMenuItem("Paste", "paste.png")
             .withShortcut(KeyEvent.VK_V, Globals.shortcutKey)
             .build();
 
-        JMenuItem clipboardCircuit = createMenuItem("DefineClipboard", 
+        JMenuItem clipboardCircuit = createMenuItem("DefineClipboard",
             "paste_new.png").build();
 
         JMenuItem editSelectAll = createMenuItem("SelectAll", "select_all.png")
@@ -475,23 +483,23 @@ public class MenuTools implements MenuListener
         menuItems.editDuplicate = createMenuItem("Duplicate", "duplicate.png")
             .withShortcut(KeyEvent.VK_D, Globals.shortcutKey)
             .build();
-        
+
         // Create transformation items
         menuItems.editMove = createMenuItem("Move", "move.png")
             .withShortcut("M")
             .build();
-            
+
         menuItems.editRotate = createMenuItem("Rotate", "rotate.png")
             .withShortcut("R")
             .build();
-            
+
         menuItems.editMirror = createMenuItem("Mirror_E", "mirror.png")
             .withShortcut("S")
             .build();
 
         // Create alignment items
         createAlignmentMenuItems();
-        
+
         // Create distribution items
         createDistributionMenuItems();
 
@@ -531,40 +539,40 @@ public class MenuTools implements MenuListener
         editMenu.add(menuItems.editMove);
         editMenu.add(menuItems.editRotate);
         editMenu.add(menuItems.editMirror);
-        
+
         // Add alignment and distribution items
         addAlignmentItemsToMenu(editMenu);
         addDistributionItemsToMenu(editMenu);
 
         return editMenu;
     }
-    
+
     /**
      * Create all alignment menu items.
      * These items allow aligning selected elements to various positions.
      */
     private void createAlignmentMenuItems()
     {
-        menuItems.alignLeftSelected = createMenuItem("alignLeftSelected", 
+        menuItems.alignLeftSelected = createMenuItem("alignLeftSelected",
             "align_left.png").build();
-            
-        menuItems.alignRightSelected = createMenuItem("alignRightSelected", 
+
+        menuItems.alignRightSelected = createMenuItem("alignRightSelected",
             "align_right.png").build();
-            
-        menuItems.alignTopSelected = createMenuItem("alignTopSelected", 
+
+        menuItems.alignTopSelected = createMenuItem("alignTopSelected",
             "align_top.png").build();
-            
-        menuItems.alignBottomSelected = createMenuItem("alignBottomSelected", 
+
+        menuItems.alignBottomSelected = createMenuItem("alignBottomSelected",
             "align_bottom.png").build();
-            
+
         menuItems.alignHorizontalCenterSelected = createMenuItem(
-            "alignHorizontalCenterSelected", 
+            "alignHorizontalCenterSelected",
             "align_horizontal_center.png").build();
-            
+
         menuItems.alignVerticalCenterSelected = createMenuItem(
             "alignVerticalCenterSelected", "align_vertical_center.png").build();
     }
-    
+
     /**
      * Create all distribution menu items.
      * These items allow distributing selected elements evenly.
@@ -572,16 +580,16 @@ public class MenuTools implements MenuListener
     private void createDistributionMenuItems()
     {
         menuItems.distributeHorizontallySelected = createMenuItem(
-            "distributeHorizontallySelected", 
+            "distributeHorizontallySelected",
             "horizonta_distribute.png").build();
-            
+
         menuItems.distributeVerticallySelected = createMenuItem(
             "distributeVerticallySelected", "vertical_distribute.png").build();
     }
-    
+
     /**
      * Add action listeners to all alignment menu items.
-     * 
+     *
      * @param al the action listener to add
      */
     private void addAlignmentActionListeners(ActionListener al)
@@ -593,10 +601,10 @@ public class MenuTools implements MenuListener
         menuItems.alignHorizontalCenterSelected.addActionListener(al);
         menuItems.alignVerticalCenterSelected.addActionListener(al);
     }
-    
+
     /**
      * Add action listeners to all distribution menu items.
-     * 
+     *
      * @param al the action listener to add
      */
     private void addDistributionActionListeners(ActionListener al)
@@ -604,10 +612,10 @@ public class MenuTools implements MenuListener
         menuItems.distributeHorizontallySelected.addActionListener(al);
         menuItems.distributeVerticallySelected.addActionListener(al);
     }
-    
+
     /**
      * Add alignment menu items to the Edit menu.
-     * 
+     *
      * @param menu the menu to add items to
      */
     private void addAlignmentItemsToMenu(JMenu menu)
@@ -620,10 +628,10 @@ public class MenuTools implements MenuListener
         menu.add(menuItems.alignHorizontalCenterSelected);
         menu.add(menuItems.alignVerticalCenterSelected);
     }
-    
+
     /**
      * Add distribution menu items to the Edit menu.
-     * 
+     *
      * @param menu the menu to add items to
      */
     private void addDistributionItemsToMenu(JMenu menu)
@@ -635,24 +643,24 @@ public class MenuTools implements MenuListener
 
     /**
      * Create the main View menu with display and layer options.
-     * 
+     *
      * @param al the action listener to associate to the menu items
      * @return the View menu
      */
     private JMenu createViewMenu(ActionListener al)
     {
         JMenu viewMenu = new JMenu(Globals.messages.getString("View"));
-        
+
         JMenuItem layerOptions = createMenuItem("Layer_opt", "layers.png")
             .withShortcut(KeyEvent.VK_L, Globals.shortcutKey)
             .build();
-            
-        JMenuItem attachImage = createMenuItem("Attach_image_menu", 
+
+        JMenuItem attachImage = createMenuItem("Attach_image_menu",
             "back_image.png").build();
 
         layerOptions.addActionListener(al);
         attachImage.addActionListener(al);
-        
+
         viewMenu.add(layerOptions);
         viewMenu.add(attachImage);
         viewMenu.addSeparator();
@@ -661,32 +669,32 @@ public class MenuTools implements MenuListener
         libs.setIcon(Globals.loadIcon(MENU_ICONS_PATH + "libs.png"));
         libs.addActionListener(al);
         viewMenu.add(libs);
-        
+
         return viewMenu;
     }
 
     /**
      * Create the main Circuit menu with circuit-specific operations.
-     * 
+     *
      * @param al the action listener to associate to the menu items
      * @return the Circuit menu
      */
     private JMenu createCircuitMenu(ActionListener al)
     {
         JMenu circuitMenu = new JMenu(Globals.messages.getString("Circuit"));
-        
+
         JMenuItem defineCircuit = createMenuItem("Define", "code.png")
             .withShortcut(KeyEvent.VK_G, Globals.shortcutKey)
             .build();
-            
-        JMenuItem updateLibraries = createMenuItem("LibraryUpdate", 
+
+        JMenuItem updateLibraries = createMenuItem("LibraryUpdate",
             "lib_update.png")
             .withShortcut(KeyEvent.VK_U, Globals.shortcutKey)
             .build();
 
         defineCircuit.addActionListener(al);
         updateLibraries.addActionListener(al);
-        
+
         circuitMenu.add(defineCircuit);
         circuitMenu.add(updateLibraries);
 
@@ -695,14 +703,14 @@ public class MenuTools implements MenuListener
 
     /**
      * Create the main About menu.
-     * 
+     *
      * @param al the action listener to associate to the menu items
      * @return the About menu
      */
     private JMenu createAboutMenu(ActionListener al)
     {
         JMenu about = new JMenu(Globals.messages.getString("About"));
-        
+
         JMenuItem aboutMenu = createMenuItem("About_menu", "info.png").build();
         aboutMenu.addActionListener(al);
         about.add(aboutMenu);
@@ -712,7 +720,7 @@ public class MenuTools implements MenuListener
 
     /**
      * Change the state of the show libs toggle menu item.
-     * 
+     *
      * @param s the state of the item
      */
     public void setShowLibsState(boolean s)
@@ -727,131 +735,131 @@ public class MenuTools implements MenuListener
     {
         // File operations
         registerFileActionHandlers();
-        
+
         // Edit operations
         registerEditActionHandlers();
-        
+
         // View operations
         registerViewActionHandlers();
-        
+
         // Circuit operations
         registerCircuitActionHandlers();
-        
+
         // Alignment operations
         registerAlignmentActionHandlers();
-        
+
         // Distribution operations
         registerDistributionActionHandlers();
     }
-    
+
     /**
      * Register all file-related action handlers.
      */
     private void registerFileActionHandlers()
     {
-        actionHandlers.put(Globals.messages.getString("New"), 
+        actionHandlers.put(Globals.messages.getString("New"),
             (frame, coordL) -> frame.createNewInstance());
-            
-        actionHandlers.put(Globals.messages.getString("Open"), 
+
+        actionHandlers.put(Globals.messages.getString("Open"),
             (frame, coordL) -> handleOpenFile(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Save"), 
+
+        actionHandlers.put(Globals.messages.getString("Save"),
             (frame, coordL) -> frame.getFileTools().save(false));
-            
-        actionHandlers.put(Globals.messages.getString("SaveName"), 
+
+        actionHandlers.put(Globals.messages.getString("SaveName"),
             (frame, coordL) -> frame.getFileTools().saveWithName(false));
-            
-        actionHandlers.put(Globals.messages.getString("Save_split"), 
+
+        actionHandlers.put(Globals.messages.getString("Save_split"),
             (frame, coordL) -> frame.getFileTools().saveWithName(true));
-            
-        actionHandlers.put(Globals.messages.getString("Export"), 
+
+        actionHandlers.put(Globals.messages.getString("Export"),
             (frame, coordL) -> handleExport(frame, coordL));
-            
-        actionHandlers.put(Globals.messages.getString("Print"), 
+
+        actionHandlers.put(Globals.messages.getString("Print"),
             (frame, coordL) -> handlePrint(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Close"), 
+
+        actionHandlers.put(Globals.messages.getString("Close"),
             (frame, coordL) -> handleClose(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Circ_opt"), 
+
+        actionHandlers.put(Globals.messages.getString("Circ_opt"),
             (frame, coordL) -> frame.showPrefs());
     }
-    
+
     /**
      * Register all edit-related action handlers.
      */
     private void registerEditActionHandlers()
     {
-        actionHandlers.put(Globals.messages.getString("Undo"), 
+        actionHandlers.put(Globals.messages.getString("Undo"),
             (frame, coordL) -> handleUndo(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Redo"), 
+
+        actionHandlers.put(Globals.messages.getString("Redo"),
             (frame, coordL) -> handleRedo(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Cut"), 
+
+        actionHandlers.put(Globals.messages.getString("Cut"),
             (frame, coordL) -> handleCut(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Copy"), 
+
+        actionHandlers.put(Globals.messages.getString("Copy"),
             (frame, coordL) -> handleCopy(frame, false));
-            
-        actionHandlers.put(Globals.messages.getString("Copy_split"), 
+
+        actionHandlers.put(Globals.messages.getString("Copy_split"),
             (frame, coordL) -> handleCopy(frame, true));
-            
-        actionHandlers.put(Globals.messages.getString("Copy_as_image"), 
+
+        actionHandlers.put(Globals.messages.getString("Copy_as_image"),
             (frame, coordL) -> handleCopyAsImage(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Paste"), 
+
+        actionHandlers.put(Globals.messages.getString("Paste"),
             (frame, coordL) -> handlePaste(frame));
-            
-        actionHandlers.put(Globals.messages.getString("DefineClipboard"), 
+
+        actionHandlers.put(Globals.messages.getString("DefineClipboard"),
             (frame, coordL) -> handleDefineClipboard(frame));
-            
-        actionHandlers.put(Globals.messages.getString("SelectAll"), 
+
+        actionHandlers.put(Globals.messages.getString("SelectAll"),
             (frame, coordL) -> handleSelectAll(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Duplicate"), 
+
+        actionHandlers.put(Globals.messages.getString("Duplicate"),
             (frame, coordL) -> handleDuplicate(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Move"), 
+
+        actionHandlers.put(Globals.messages.getString("Move"),
             (frame, coordL) -> handleMove(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Rotate"), 
+
+        actionHandlers.put(Globals.messages.getString("Rotate"),
             (frame, coordL) -> handleRotate(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Mirror_E"), 
+
+        actionHandlers.put(Globals.messages.getString("Mirror_E"),
             (frame, coordL) -> handleMirror(frame));
     }
-    
+
     /**
      * Register all view-related action handlers.
      */
     private void registerViewActionHandlers()
     {
-        actionHandlers.put(Globals.messages.getString("Layer_opt"), 
+        actionHandlers.put(Globals.messages.getString("Layer_opt"),
             (frame, coordL) -> handleLayerOptions(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Libs"), 
+
+        actionHandlers.put(Globals.messages.getString("Libs"),
             (frame, coordL) -> handleShowLibs(frame));
-            
-        actionHandlers.put(Globals.messages.getString("Attach_image_menu"), 
+
+        actionHandlers.put(Globals.messages.getString("Attach_image_menu"),
             (frame, coordL) -> handleAttachImage(frame));
     }
-    
+
     /**
      * Register all circuit-related action handlers.
      */
     private void registerCircuitActionHandlers()
     {
-        actionHandlers.put(Globals.messages.getString("Define"), 
+        actionHandlers.put(Globals.messages.getString("Define"),
             (frame, coordL) -> handleDefineCircuit(frame));
-            
-        actionHandlers.put(Globals.messages.getString("LibraryUpdate"), 
+
+        actionHandlers.put(Globals.messages.getString("LibraryUpdate"),
             (frame, coordL) -> handleUpdateLibraries(frame));
-            
-        actionHandlers.put(Globals.messages.getString("About_menu"), 
+
+        actionHandlers.put(Globals.messages.getString("About_menu"),
             (frame, coordL) -> handleAbout(frame));
     }
-    
+
     /**
      * Register all alignment-related action handlers.
      */
@@ -859,41 +867,41 @@ public class MenuTools implements MenuListener
     {
         actionHandlers.put(
                 Globals.messages.getString("alignLeftSelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::alignLeftSelected));
-                
+
         actionHandlers.put(
                 Globals.messages.getString("alignRightSelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::alignRightSelected));
-                
+
         actionHandlers.put(
                 Globals.messages.getString("alignTopSelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::alignTopSelected));
-                
+
         actionHandlers.put(
                 Globals.messages.getString("alignBottomSelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::alignBottomSelected));
-                
+
         actionHandlers.put(
                 Globals.messages.getString("alignHorizontalCenterSelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::alignHorizontalCenterSelected));
-                
+
         actionHandlers.put(
                 Globals.messages.getString("alignVerticalCenterSelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::alignVerticalCenterSelected));
     }
-    
+
     /**
      * Register all distribution-related action handlers.
      */
@@ -901,13 +909,13 @@ public class MenuTools implements MenuListener
     {
         actionHandlers.put(
                 Globals.messages.getString("distributeHorizontallySelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::distributeHorizontallySelected));
-                
+
         actionHandlers.put(
                 Globals.messages.getString("distributeVerticallySelected"),
-                (frame, coordL) -> handleAlignment(frame, 
+                (frame, coordL) -> handleAlignment(frame,
                 frame.getCircuitPanel()
                         .getEditorActions()::distributeVerticallySelected));
     }
@@ -915,7 +923,7 @@ public class MenuTools implements MenuListener
     /**
      * Process menu action events by dispatching to appropriate handlers.
      * This is the main entry point for handling all menu actions.
-     * 
+     *
      * @param evt the action event
      * @param fidoFrame the main frame in which the menu is present
      * @param coordL the coordinate listener to show messages if needed
@@ -925,26 +933,26 @@ public class MenuTools implements MenuListener
     {
         String action = evt.getActionCommand();
         MenuActionHandler handler = actionHandlers.get(action);
-        
+
         if (handler != null) {
             handler.handle(fidoFrame, coordL);
         }
     }
-    
+
     // ========================================================================
     // Handler methods for specific actions
     // ========================================================================
-    
+
     /**
      * Handle opening a file.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleOpenFile(FidoFrame frame)
     {
         OpenFile openf = new OpenFile();
         openf.setParam(frame);
-        
+
         /*  TODO:
             The following code would require a thread safe implementation
             of some of the inner classes (such as CircuitModel), which was
@@ -952,10 +960,10 @@ public class MenuTools implements MenuListener
         */
         SwingUtilities.invokeLater(openf);
     }
-    
+
     /**
      * Handle export operation.
-     * 
+     *
      * @param frame the main application frame
      * @param coordL the coordinate listener
      */
@@ -966,10 +974,10 @@ public class MenuTools implements MenuListener
         exportTools.launchExport(frame, frame.getCircuitPanel(),
                 frame.getFileTools().getOpenFileDirectory());
     }
-    
+
     /**
      * Handle print operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handlePrint(FidoFrame frame)
@@ -979,10 +987,10 @@ public class MenuTools implements MenuListener
         printTools.associateToCircuitPanel(circuitPanel);
         printTools.printDrawing(frame);
     }
-    
+
     /**
      * Handle window close operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleClose(FidoFrame frame)
@@ -992,10 +1000,10 @@ public class MenuTools implements MenuListener
         }
         frame.closeThisFrame();
     }
-    
+
     /**
      * Handle undo operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleUndo(FidoFrame frame)
@@ -1003,10 +1011,10 @@ public class MenuTools implements MenuListener
         frame.getCircuitPanel().getUndoActions().undo();
         frame.repaint();
     }
-    
+
     /**
      * Handle redo operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleRedo(FidoFrame frame)
@@ -1014,10 +1022,10 @@ public class MenuTools implements MenuListener
         frame.getCircuitPanel().getUndoActions().redo();
         frame.repaint();
     }
-    
+
     /**
      * Handle cut operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleCut(FidoFrame frame)
@@ -1025,15 +1033,15 @@ public class MenuTools implements MenuListener
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         CopyPasteActions copyPasteActions = circuitPanel.getCopyPasteActions();
         EditorActions editorActions = circuitPanel.getEditorActions();
-        
+
         copyPasteActions.copySelected(!circuitPanel.extStrict, false);
         editorActions.deleteAllSelected(true);
         frame.repaint();
     }
-    
+
     /**
      * Handle copy operation.
-     * 
+     *
      * @param frame the main application frame
      * @param split whether to split non-standard macros
      */
@@ -1043,12 +1051,12 @@ public class MenuTools implements MenuListener
         CopyPasteActions copyPasteActions = circuitPanel.getCopyPasteActions();
         copyPasteActions.copySelected(!circuitPanel.extStrict, split);
     }
-    
+
     /**
      * Handle copy as image operation.
      * Display a dialog similar to the Export menu and create an image
      * that is stored in the clipboard, using a bitmap or vector format.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleCopyAsImage(FidoFrame frame)
@@ -1056,109 +1064,109 @@ public class MenuTools implements MenuListener
         ExportTools exportTools = frame.getExportTools();
         exportTools.exportAsCopiedImage(frame, frame.getCircuitPanel());
     }
-    
+
     /**
      * Handle paste operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handlePaste(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         CopyPasteActions copyPasteActions = circuitPanel.getCopyPasteActions();
-        
+
         copyPasteActions.paste(
                 circuitPanel.getMapCoordinates().getXGridStep(),
                 circuitPanel.getMapCoordinates().getYGridStep());
         frame.repaint();
     }
-    
+
     /**
      * Handle define clipboard operation.
      * Paste clipboard content as a new circuit.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleDefineClipboard(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         ParserActions parserActions = circuitPanel.getParserActions();
-        
+
         TextTransfer textTransfer = new TextTransfer();
-        
+
         if (circuitPanel.getUndoActions().getModified()) {
             frame.createNewInstance();
         }
-        
+
         parserActions.parseString(
             new StringBuffer(textTransfer.getClipboardContents()));
         frame.repaint();
     }
-    
+
     /**
      * Handle select all operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleSelectAll(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         SelectionActions selectionActions = circuitPanel.getSelectionActions();
-        
+
         selectionActions.setSelectionAll(true);
         // Even if the drawing is not changed, a repaint operation is
         // needed since all selected elements are rendered in green.
         frame.repaint();
     }
-    
+
     /**
      * Handle duplicate operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleDuplicate(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         CopyPasteActions copyPasteActions = circuitPanel.getCopyPasteActions();
-        
+
         copyPasteActions.copySelected(!circuitPanel.extStrict, false);
         copyPasteActions.paste(
                 circuitPanel.getMapCoordinates().getXGridStep(),
                 circuitPanel.getMapCoordinates().getYGridStep());
         frame.repaint();
     }
-    
+
     /**
      * Handle move operation.
      * Start moving selected elements with Move command.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleMove(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         SelectionActions selectionActions = circuitPanel.getSelectionActions();
-        
+
         if (selectionActions.getFirstSelectedPrimitive() != null) {
             circuitPanel.getContinuosMoveActions().startMovingSelected(
                         circuitPanel.getMapCoordinates());
             frame.repaint();
         }
     }
-    
+
     /**
      * Handle rotate operation.
      * 90 degrees rotation of all selected elements.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleRotate(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         EditorActions editorActions = circuitPanel.getEditorActions();
-        ElementsEdtActions elementsEdtActions = 
+        ElementsEdtActions elementsEdtActions =
                 circuitPanel.getContinuosMoveActions();
-        
+
         if (elementsEdtActions.isEnteringMacro()) {
             elementsEdtActions.rotateMacro();
         } else {
@@ -1166,20 +1174,20 @@ public class MenuTools implements MenuListener
         }
         frame.repaint();
     }
-    
+
     /**
      * Handle mirror operation.
      * Mirror all the selected elements.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleMirror(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         EditorActions editorActions = circuitPanel.getEditorActions();
-        ElementsEdtActions elementsEdtActions = 
+        ElementsEdtActions elementsEdtActions =
                 circuitPanel.getContinuosMoveActions();
-        
+
         if (elementsEdtActions.isEnteringMacro()) {
             elementsEdtActions.mirrorMacro();
         } else {
@@ -1187,10 +1195,10 @@ public class MenuTools implements MenuListener
         }
         frame.repaint();
     }
-    
+
     /**
      * Handle alignment operations using a functional approach.
-     * 
+     *
      * @param frame the main application frame
      * @param alignmentAction the alignment action to execute
      */
@@ -1199,16 +1207,16 @@ public class MenuTools implements MenuListener
         alignmentAction.run();
         frame.repaint();
     }
-    
+
     /**
      * Handle layer options dialog.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleLayerOptions(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
-        
+
         DialogLayer layerDialog = new DialogLayer(frame,
                 circuitPanel.getDrawingModel().getLayers());
         layerDialog.setVisible(true);
@@ -1219,10 +1227,10 @@ public class MenuTools implements MenuListener
         circuitPanel.getDrawingModel().setChanged(true);
         frame.repaint();
     }
-    
+
     /**
      * Handle show/hide libraries operation.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleShowLibs(FidoFrame frame)
@@ -1230,23 +1238,23 @@ public class MenuTools implements MenuListener
         frame.showLibs(!frame.areLibsVisible());
         libs.setState(frame.areLibsVisible());
     }
-    
+
     /**
      * Handle attach image dialog.
      * Show the attach image dialog and process the result.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleAttachImage(FidoFrame frame)
     {
         ImageAsCanvas ii = frame.getCircuitPanel().getAttachedImage();
         DialogAttachImage di = new DialogAttachImage(frame);
-        
+
         di.setFilename(ii.getFilename());
         di.setCorner(ii.getCornerX(), ii.getCornerY());
         di.setResolution(ii.getResolution());
         di.setVisible(true);
-        
+
         if (di.shouldAttach()) {
             try {
                 if (di.getShowImage()) {
@@ -1264,18 +1272,18 @@ public class MenuTools implements MenuListener
             }
         }
     }
-    
+
     /**
      * Handle define circuit dialog.
      * Edit the FidoCadJ code of the drawing.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleDefineCircuit(FidoFrame frame)
     {
         CircuitPanel circuitPanel = frame.getCircuitPanel();
         ParserActions parserActions = circuitPanel.getParserActions();
-        
+
         DialogCircuitCode circuitDialog = new DialogCircuitCode(frame,
             parserActions.getText(!circuitPanel.extStrict).toString());
         circuitDialog.setVisible(true);
@@ -1285,11 +1293,11 @@ public class MenuTools implements MenuListener
         circuitPanel.getUndoActions().saveUndoState();
         frame.repaint();
     }
-    
+
     /**
      * Handle library update operation.
      * Update libraries and refresh the display.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleUpdateLibraries(FidoFrame frame)
@@ -1297,11 +1305,11 @@ public class MenuTools implements MenuListener
         frame.loadLibraries();
         frame.setVisible(true);
     }
-    
+
     /**
      * Handle about dialog.
      * Show the about menu.
-     * 
+     *
      * @param frame the main application frame
      */
     private void handleAbout(FidoFrame frame)
@@ -1309,90 +1317,96 @@ public class MenuTools implements MenuListener
         DialogAbout d = new DialogAbout(frame);
         d.setVisible(true);
     }
-    
+
     // ========================================================================
     // Menu Item Builder - Helper class for creating menu items
     // ========================================================================
-    
+
     /**
      * Builder class for creating menu items
      */
-    private static class MenuItemBuilder {
+    private static class MenuItemBuilder
+    {
         private String textKey;
         private String iconName;
         private KeyStroke accelerator;
-        
+
         /**
          * Create a builder with the specified text key.
-         * 
+         *
          * @param textKey the resource key for the menu item text
          */
-        MenuItemBuilder(String textKey) {
+        MenuItemBuilder(String textKey)
+        {
             this.textKey = textKey;
         }
-        
+
         /**
          * Set the icon for this menu item.
-         * 
+         *
          * @param iconName the icon filename (without path)
          * @return this builder for method chaining
          */
-        MenuItemBuilder withIcon(String iconName) {
+        MenuItemBuilder withIcon(String iconName)
+        {
             this.iconName = iconName;
             return this;
         }
-        
+
         /**
          * Set a keyboard shortcut for this menu item.
-         * 
+         *
          * @param key the key code
          * @param modifiers the modifier keys
          * @return this builder for method chaining
          */
-        MenuItemBuilder withShortcut(int key, int modifiers) {
+        MenuItemBuilder withShortcut(int key, int modifiers)
+        {
             this.accelerator = KeyStroke.getKeyStroke(key, modifiers);
             return this;
         }
-        
+
         /**
          * Set a simple key shortcut (single letter, no modifiers).
-         * 
+         *
          * @param key the key string
          * @return this builder for method chaining
          */
-        MenuItemBuilder withShortcut(String key) {
+        MenuItemBuilder withShortcut(String key)
+        {
             this.accelerator = KeyStroke.getKeyStroke(key);
             return this;
         }
-        
+
         /**
          * Build the menu item with all specified properties.
-         * 
+         *
          * @return the constructed JMenuItem
          */
-        JMenuItem build() {
+        JMenuItem build()
+        {
             JMenuItem item = new JMenuItem(Globals.messages.getString(textKey));
-            
+
             if (iconName != null) {
                 item.setIcon(Globals.loadIcon(MENU_ICONS_PATH + iconName));
             }
-            
+
             if (accelerator != null) {
                 item.setAccelerator(accelerator);
             }
-            
+
             return item;
         }
     }
-    
+
     /**
      * Factory method to create a menu item builder.
-     * 
+     *
      * @param textKey the resource key for the menu item text
      * @param iconName the icon filename (without path)
      * @return a new MenuItemBuilder
      */
-    private static MenuItemBuilder createMenuItem(String textKey, 
+    private static MenuItemBuilder createMenuItem(String textKey,
             String iconName)
     {
         return new MenuItemBuilder(textKey).withIcon(iconName);

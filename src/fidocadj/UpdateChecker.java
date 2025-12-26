@@ -33,71 +33,71 @@ import java.util.regex.Pattern;
     @author Manuel Finessi
 */
 
-public class UpdateChecker 
+public class UpdateChecker
 {
-    
-    private static final String RELEASES_URL = 
+
+    private static final String RELEASES_URL =
             "https://github.com/FidoCadJ/FidoCadJ/releases/";
-    
+
     private static final int TIMEOUT_MS = 10000;
-    
+
     private final String currentVersion;
     private final UpdateListener listener;
     private Thread checkerThread;
-    
+
     /**
      * Listener interface for receiving update notifications.
      */
-    public interface UpdateListener 
+    public interface UpdateListener
     {
         /**
          * Called when a newer version is available.
-         * 
+         *
          * @param latestVersion the version string of the latest release
          */
         void onUpdateAvailable(String latestVersion);
-        
+
         /**
          * Called when the current version is up to date.
          */
         void onNoUpdateAvailable();
-        
+
         /**
          * Called when the update check fails for any reason.
-         * 
+         *
          * @param reason a description of why the check failed
          */
         void onCheckFailed(String reason);
     }
-    
+
     /**
      * Constructs a new UpdateChecker.
-     * 
-     * @param currentVersion the current version of the application 
-     * @param listener the listener to receive update notifications 
+     *
+     * @param currentVersion the current version of the application
+     * @param listener the listener to receive update notifications
      */
-    public UpdateChecker(String currentVersion, UpdateListener listener) 
+    public UpdateChecker(String currentVersion, UpdateListener listener)
     {
         this.currentVersion = currentVersion;
         this.listener = listener;
     }
-    
+
     /**
      * Starts the update check in a separate background thread.
      * If a check is already running, this method does nothing.
      * The thread is configured as a daemon thread to avoid
      * blocking application shutdown.
      */
-    public void startCheck() 
+    public void startCheck()
     {
         if (checkerThread != null && checkerThread.isAlive()) {
             return;
         }
-        
+
         checkerThread = new Thread(() -> {
             try {
                 String latestVersion = fetchLatestVersion();
-                
+
                 if (latestVersion != null) {
                     if (isNewerVersion(latestVersion, currentVersion)) {
                         if (listener != null) {
@@ -121,21 +121,21 @@ public class UpdateChecker
                 }
             }
         }, "UpdateCheckerThread");
-        
+
         checkerThread.setDaemon(true);
         checkerThread.start();
     }
-    
+
     /**
      * Fetches the releases page and extracts the latest version.
-     * 
+     *
      * @return the latest version string, or null if it cannot be determined
      */
-    private String fetchLatestVersion() 
+    private String fetchLatestVersion()
     {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
-        
+
         try {
             URL url = new URL(RELEASES_URL);
             connection = (HttpURLConnection) url.openConnection();
@@ -144,24 +144,24 @@ public class UpdateChecker
             connection.setReadTimeout(TIMEOUT_MS);
             connection.setRequestProperty(
                     "User-Agent", "FidoCadJ-UpdateChecker");
-            
+
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
                 return null;
             }
-            
+
             reader = new BufferedReader(
                     new InputStreamReader(connection.getInputStream()));
-            
+
             StringBuilder content = new StringBuilder();
             String line;
-            
+
             while ((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
             }
-            
+
             return parseLatestVersion(content.toString());
-            
+
         } catch (Exception e) {
             return null;
         } finally {
@@ -173,23 +173,23 @@ public class UpdateChecker
             }
         }
     }
-    
+
     /**
      * Parses the HTML content to extract the latest version number.
-     * Uses multiple regex patterns to handle different 
+     * Uses multiple regex patterns to handle different
      * GitHub release page formats.
-     * 
+     *
      * @param html the HTML content of the releases page
      * @return the version string if found, null otherwise
      */
-    private String parseLatestVersion(String html) 
+    private String parseLatestVersion(String html)
     {
         try {
             Pattern pattern = Pattern.compile(
                     "/releases/tag/v?([0-9]+\\.[0-9]+\\.[0-9]+(?:[\\s_-]?(?" +
                     ":alpha|beta|gamma|delta|epsilon|rc|release))" +
                     "?[a-zA-Z0-9\\-]*)");
-            
+
             Matcher matcher = pattern.matcher(html);
 
             if (matcher.find()) {
@@ -197,10 +197,10 @@ public class UpdateChecker
             }
 
             pattern = Pattern.compile(
-                    "releases/tag/([0-9]+\\.[0-9]+\\.[0-9]+(?:[\\s_-]?(?" + 
-                    ":alpha|beta|gamma|delta|epsilon|rc|release))" + 
+                    "releases/tag/([0-9]+\\.[0-9]+\\.[0-9]+(?:[\\s_-]?(?" +
+                    ":alpha|beta|gamma|delta|epsilon|rc|release))" +
                     "?[a-zA-Z0-9\\-]*)");
-            
+
             matcher = pattern.matcher(html);
 
             if (matcher.find()) {
@@ -212,20 +212,21 @@ public class UpdateChecker
             return null;
         }
     }
-    
+
     /**
-    * Compares two version strings to determine if the first 
+    * Compares two version strings to determine if the first
     * is newer than the second.
-    * Supports semantic versioning format 
+    * Supports semantic versioning format
     * (major.minor.patch) with optional Greek suffixes.
-    * Only suggests stable versions (without suffixes) as updates, 
+    * Only suggests stable versions (without suffixes) as updates,
     * unless the current version is also a pre-release.
-    * 
+    *
     * @param v1 the first version string (e.g., "0.24.9", "0.24.8 beta")
     * @param v2 the second version string (e.g., "0.24.8", "0.24.8 alpha")
     * @return true if v1 is newer than v2 and should be suggested as an update
     */
-    private boolean isNewerVersion(String v1, String v2) {
+    private boolean isNewerVersion(String v1, String v2)
+    {
         try {
             // Remove any 'v' prefix
             v1 = v1.replaceAll("^v", "").trim();
@@ -253,10 +254,10 @@ public class UpdateChecker
             int patch2 = Integer.parseInt(m2.group(3));
             String suffix2 = m2.group(4);
 
-            boolean isVersion1Stable = (suffix1 == null || 
+            boolean isVersion1Stable = (suffix1 == null ||
                     suffix1.isEmpty() || suffix1.equalsIgnoreCase("release"));
-            
-            boolean isVersion2Stable = (suffix2 == null || 
+
+            boolean isVersion2Stable = (suffix2 == null ||
                     suffix2.isEmpty() || suffix2.equalsIgnoreCase("release"));
 
             // If v1 is a pre-release and v2 is stable, never suggest the update
@@ -269,10 +270,10 @@ public class UpdateChecker
             if (!isVersion1Stable && !isVersion2Stable) {
                 // Only compare pre-releases of the same numeric version
                 if (major1 == major2 && minor1 == minor2 && patch1 == patch2) {
-                    return getSuffixPriority(suffix1) > 
+                    return getSuffixPriority(suffix1) >
                             getSuffixPriority(suffix2);
                 }
-                return false; // Don't suggest different 
+                return false; // Don't suggest different
                               // numeric versions of pre-releases
             }
 
@@ -289,37 +290,37 @@ public class UpdateChecker
             return false;
         }
     }
-   
+
    /**
     * Returns the priority value for a version suffix.
     * Higher values indicate more stable/recent versions.
-    * 
+    *
     * @param suffix the version suffix (alpha, beta, etc.) or null for stable
     * @return the priority value
     */
-   private int getSuffixPriority(String suffix) 
-   {
-       if (suffix == null || suffix.isEmpty() || 
-               suffix.equalsIgnoreCase("release")) 
-       {
-           return 100; // Stable version (no suffix)
-       }
+    private int getSuffixPriority(String suffix)
+    {
+        if (suffix == null || suffix.isEmpty() ||
+                suffix.equalsIgnoreCase("release"))
+        {
+            return 100; // Stable version (no suffix)
+        }
 
-       switch (suffix.toLowerCase()) {
-           case "rc":
-               return 90;
-           case "epsilon":
-               return 50;
-           case "delta":
-               return 40;
-           case "gamma":
-               return 30;
-           case "beta":
-               return 20;
-           case "alpha":
-               return 10;
-           default:
-               return 0;
-       }
-   }
+        switch (suffix.toLowerCase()) {
+            case "rc":
+                return 90;
+            case "epsilon":
+                return 50;
+            case "delta":
+                return 40;
+            case "gamma":
+                return 30;
+            case "beta":
+                return 20;
+            case "alpha":
+                return 10;
+            default:
+                return 0;
+        }
+    }
 }

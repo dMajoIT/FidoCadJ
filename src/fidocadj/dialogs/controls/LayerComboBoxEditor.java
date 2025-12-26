@@ -64,7 +64,7 @@ public final class LayerComboBoxEditor extends AbstractCellEditor implements
     private Icon invisibleIcon;
     private final FidoFrame fidoFrame;
     private CircuitPanel circuitPanel;
-    private final int ICON_SIZE = 20;
+    private final int iconSize = 20;
 
     private final ArrayList<ActionListener> actionListeners = new ArrayList<>();
 
@@ -174,11 +174,11 @@ public final class LayerComboBoxEditor extends AbstractCellEditor implements
         colorLabel.setOpaque(true);
         ColorSwing color=(ColorSwing) currentLayer.getColor();
         colorLabel.setBackground(color.getColorSwing());
-        colorLabel.setPreferredSize(new Dimension(25, ICON_SIZE));
+        colorLabel.setPreferredSize(new Dimension(25, iconSize));
 
         visibilityLabel.setIcon(
                 currentLayer.isVisible() ? visibleIcon : invisibleIcon);
-        visibilityLabel.setPreferredSize(new Dimension(ICON_SIZE, ICON_SIZE));
+        visibilityLabel.setPreferredSize(new Dimension(iconSize, iconSize));
 
         nameLabel.setText(currentLayer.getDescription());
     }

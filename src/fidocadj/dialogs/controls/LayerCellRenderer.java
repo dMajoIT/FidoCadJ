@@ -44,7 +44,7 @@ public final class LayerCellRenderer extends JPanel implements
     private final JLabel nameLabel;
     private final Icon visibleIcon;
     private final Icon invisibleIcon;
-    private final int ICON_SIZE = 20;
+    private final int iconSize = 20;
 
     /**
      * Constructs a LayerRenderer.
@@ -86,12 +86,12 @@ public final class LayerCellRenderer extends JPanel implements
         ColorSwing color=(ColorSwing) layer.getColor();
 
         colorLabel.setBackground(color.getColorSwing());
-        colorLabel.setPreferredSize(new Dimension(25, ICON_SIZE));
+        colorLabel.setPreferredSize(new Dimension(25, iconSize));
 
         visibilityLabel.setIcon(
                 layer.isVisible() ? visibleIcon : invisibleIcon);
 
-        visibilityLabel.setPreferredSize(new Dimension(ICON_SIZE, ICON_SIZE));
+        visibilityLabel.setPreferredSize(new Dimension(iconSize, iconSize));
 
         nameLabel.setText(layer.getDescription());
         nameLabel.setForeground(Color.BLACK);

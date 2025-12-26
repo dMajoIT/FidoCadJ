@@ -146,12 +146,13 @@ public abstract class GraphicPrimitive
         setMacroFontSize(4);
         macroFont="";
     }
-    
-    
+
+
     /**
      * @return the currentLayer
      */
-    public LayerDesc getCurrentLayer() {
+    public LayerDesc getCurrentLayer()
+    {
         return currentLayer;
     }
 

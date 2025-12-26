@@ -345,7 +345,7 @@ public final class PrimitivePCBLine extends GraphicPrimitive
         if (getCurrentLayer().isVisible() == false) {
             return false;
         }
-        
+
         if (isLeftToRightSelection) {
             return isFullyContained(rect);
         }

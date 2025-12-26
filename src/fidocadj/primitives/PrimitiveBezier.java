@@ -534,7 +534,7 @@ public final class PrimitiveBezier extends GraphicPrimitive
         if (getCurrentLayer().isVisible() == false) {
             return false;
         }
-                
+
         if (isLeftToRightSelection) {
             return isFullyContained(rect);
         }

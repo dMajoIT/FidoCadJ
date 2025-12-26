@@ -54,7 +54,7 @@ public class ContinuosMoveActions extends ElementsEdtActions
 
     private int oldx;
     private int oldy;
-    
+
     // Variables for moving selected primitives with Move command
     private boolean isMovingSelected = false;
     private Map<GraphicPrimitive, PointG> originalPositions;
@@ -116,7 +116,7 @@ public class ContinuosMoveActions extends ElementsEdtActions
             updateMovePositions(cs.unmapXsnap(xa), cs.unmapYsnap(ya));
             return true;
         }
-        
+
         // This transformation/antitrasformation is useful to take care
         // of the snapping.
         int x=cs.mapX(cs.unmapXsnap(xa),0);
@@ -390,10 +390,11 @@ public class ContinuosMoveActions extends ElementsEdtActions
         }
         return toRepaint;
     }
-    
+
     /** Start moving selected primitives with Move command.
         This saves the original positions and calculates the center.
         NOTE: This is ONLY for the Move command, not for normal drag operations.
+        @param cs the current MapCoordinates system.
     */
     public void startMovingSelected(MapCoordinates cs)
     {
@@ -414,7 +415,7 @@ public class ContinuosMoveActions extends ElementsEdtActions
         for (GraphicPrimitive g : dmp.getPrimitiveVector()) {
             if (g.isSelected()) {
                 originalPositions.put(g, new PointG(
-                    g.getFirstPoint().x, 
+                    g.getFirstPoint().x,
                     g.getFirstPoint().y));
 
                 // Update bounds
@@ -439,7 +440,7 @@ public class ContinuosMoveActions extends ElementsEdtActions
         selectionCenterX = cs.unmapXsnap(screenX);
         selectionCenterY = cs.unmapYsnap(screenY);
     }
-    
+
     /** Check if we are currently moving selected primitives.
         @return true if in move mode
     */
@@ -464,7 +465,7 @@ public class ContinuosMoveActions extends ElementsEdtActions
         int dy = y - selectionCenterY;
 
         // Move all selected primitives relative to their original positions
-        for (Map.Entry<GraphicPrimitive, PointG> entry : 
+        for (Map.Entry<GraphicPrimitive, PointG> entry :
                 originalPositions.entrySet()) {
             GraphicPrimitive g = entry.getKey();
             PointG originalPos = entry.getValue();
@@ -490,7 +491,7 @@ public class ContinuosMoveActions extends ElementsEdtActions
 
         isMovingSelected = false;
         originalPositions = null;
-        
+
         if (ua != null) {
             ua.saveUndoState();
         }
@@ -505,7 +506,7 @@ public class ContinuosMoveActions extends ElementsEdtActions
         }
 
         // Restore all original positions
-        for (Map.Entry<GraphicPrimitive, PointG> entry : 
+        for (Map.Entry<GraphicPrimitive, PointG> entry :
                 originalPositions.entrySet()) {
             GraphicPrimitive g = entry.getKey();
             PointG originalPos = entry.getValue();

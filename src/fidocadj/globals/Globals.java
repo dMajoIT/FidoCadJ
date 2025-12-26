@@ -39,7 +39,8 @@ import fidocadj.ADesktopIntegration;
  *
  * </pre>
  */
-public final class Globals {
+public final class Globals
+{
 
     // message bundle
     public static AccessResources messages;
@@ -133,11 +134,11 @@ public final class Globals {
      * "/icons/menu_icons/new.png").
      * @return the ImageIcon, colorized with the theme's menu text color.
      */
-    public static ImageIcon loadIcon(String resourcePath) 
+    public static ImageIcon loadIcon(String resourcePath)
     {
         // Get the menu text color from FlatLaf UIManager
         Color menuTextColor = UIManager.getColor("MenuItem.foreground");
-    
+
         // Load the original icon
         URL iconUrl = Globals.class.getResource(resourcePath);
         if (iconUrl == null) {
@@ -146,7 +147,7 @@ public final class Globals {
         }
 
         ImageIcon icon = new ImageIcon(iconUrl);
-        
+
 
         // Fallback to other colors if not available
         if (menuTextColor == null) {
@@ -171,7 +172,7 @@ public final class Globals {
      * @param targetColor the color to apply to the icon.
      * @return a new ImageIcon with the applied color.
      */
-    private static ImageIcon colorizeIcon(ImageIcon icon, Color targetColor) 
+    private static ImageIcon colorizeIcon(ImageIcon icon, Color targetColor)
     {
         Image image = icon.getImage();
         int width = image.getWidth(null);
@@ -183,7 +184,7 @@ public final class Globals {
 
         BufferedImage bufferedImage = new BufferedImage(
                 width, height, BufferedImage.TYPE_INT_ARGB);
-        
+
         Graphics2D g2d = bufferedImage.createGraphics();
         g2d.drawImage(image, 0, 0, null);
         g2d.dispose();
@@ -203,10 +204,10 @@ public final class Globals {
                 }
 
                 // Replace RGB, keep alpha
-                int newRGBA = (alpha << 24) | 
-                            (targetR << 16) | 
+                int newRGBA = (alpha << 24) |
+                            (targetR << 16) |
                              (targetG << 8) | targetB;
-                
+
                 bufferedImage.setRGB(x, y, newRGBA);
             }
         }
@@ -221,7 +222,7 @@ public final class Globals {
      * @param len the total maximum length of the result.
      * @return the prettified path.
      */
-    public static String prettifyPath(String s, int len) 
+    public static String prettifyPath(String s, int len)
     {
         int l = len;
         if (s.length() < l) {
@@ -246,7 +247,7 @@ public final class Globals {
      * @param ctrlCode key code for Ctrl key.
      */
     public static void configureInterfaceDetailsFromPlatform(int metaCode,
-            int ctrlCode) 
+            int ctrlCode)
     {
         useNativeFileDialogs = false;
         useMetaForMultipleSelection = false;
@@ -281,7 +282,7 @@ public final class Globals {
      * contain one. This extension should NOT contain the dot.
      * @return true if an extension already exists.
      */
-    public static boolean checkExtension(String p, String ext) 
+    public static boolean checkExtension(String p, String ext)
     {
         // TODO: check if the code can be simplified.
         int i;
@@ -341,7 +342,7 @@ public final class Globals {
      * contain one. This extension should NOT contain the dot.
      * @return the absolutely gorgeous file name, completed with an extension.
      */
-    public static String adjustExtension(String p, String ext) 
+    public static String adjustExtension(String p, String ext)
     {
         int i;
 
@@ -390,7 +391,7 @@ public final class Globals {
      * @param s the file name with path and extension to be processed.
      * @return the file name, without path and extension(s).
      */
-    public static String getFileNameOnly(String s) 
+    public static String getFileNameOnly(String s)
     {
         // We need to check only the file name and not the entire path.
         // So we begin our research only after the last file separation
@@ -420,7 +421,7 @@ public final class Globals {
      * @param filename the file name
      * @return the complete filename, including path
      */
-    public static String createCompleteFileName(String path, String filename) 
+    public static String createCompleteFileName(String path, String filename)
     {
         boolean incl = !path.endsWith(System.getProperty("file.separator"));
         return path + (incl ? System.getProperty("file.separator") : "")
@@ -438,7 +439,7 @@ public final class Globals {
      * @return the string with the characters changed.
      *
      */
-    public static String substituteBizarreChars(String p, Map bc) 
+    public static String substituteBizarreChars(String p, Map bc)
     {
         StringBuffer s = new StringBuffer("");
         for (int i = 0; i < p.length(); ++i) {
@@ -458,7 +459,7 @@ public final class Globals {
      * @param ch the number of decimal digits to be retained.
      * @return a string containing the result rounded to n digits.
      */
-    public static String roundTo(double n, int ch) 
+    public static String roundTo(double n, int ch)
     {
         return "" + (((int) (n * Math.pow(10, ch))) / Math.pow(10, ch));
     }
@@ -469,7 +470,7 @@ public final class Globals {
      * @param n the number to be represented.
      * @return a string containing the result rounded to two digits.
      */
-    public static String roundTo(double n) 
+    public static String roundTo(double n)
     {
         return "" + Math.round(n * 100.0) / 100.0;
     }

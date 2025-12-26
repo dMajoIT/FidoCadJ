@@ -90,7 +90,8 @@ public class UndoManager
     */
     public boolean canRedo()
     {
-        // Can redo if isRedoable flag is set and pointer is less than buffer size
+        // Can redo if isRedoable flag is set and pointer is less than buffer
+        // size
         return isRedoable && pointer >= 1 && pointer < undoBuffer.size();
     }
 

@@ -325,9 +325,9 @@ public class ElementsEdtActions
                 newtext.setSelected(true);
                 repaint=true;
                 if(primitivesParListener!=null) {
-                    boolean ret = 
+                    boolean ret =
                             primitivesParListener.setPropertiesForPrimitive();
-                    
+
                     if (ret == false) {
                         // remove the text if user don't confirm
                         dmp.getPrimitiveVector().remove(newtext);

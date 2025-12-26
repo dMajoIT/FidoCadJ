@@ -182,7 +182,7 @@ public class PanelDrawingSettings extends JPanel implements SettingsPanel
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(8, 6, 6, 6));
         add(shiftCPCheckBox, constraints);
-        
+
         // Checkbox for Zoom Key
         zoomKeyCheckBox = new JCheckBox(Globals.messages.getString("Zoom_key"));
         constraints = DialogUtil.createConst(1, 8, 1, 1, 1.0, 0.0,

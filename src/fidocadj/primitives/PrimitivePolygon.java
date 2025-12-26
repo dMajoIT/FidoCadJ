@@ -611,7 +611,7 @@ public final class PrimitivePolygon extends GraphicPrimitive
         if (getCurrentLayer().isVisible() == false) {
             return false;
         }
-        
+
         // Convert the polygon's points to arrays for easy processing
         int[] xp = new int[nPoints];
         int[] yp = new int[nPoints];

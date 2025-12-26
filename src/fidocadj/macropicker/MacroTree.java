@@ -600,11 +600,12 @@ public class MacroTree extends JPanel
         treeScrollPane = new JScrollPane(treeComponent);
         treeScrollPane.setMinimumSize(new Dimension(150, 100));
         treeScrollPane.setPreferredSize(new Dimension(350, 600));
-        
-        treeComponent.addFocusListener(new FocusAdapter() 
+
+        treeComponent.addFocusListener(new FocusAdapter()
         {
             @Override
-            public void focusLost(FocusEvent e) {
+            public void focusLost(FocusEvent e)
+            {
                 treeComponent.clearSelection();
             }
         });
