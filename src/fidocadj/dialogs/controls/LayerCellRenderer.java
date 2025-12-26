@@ -5,6 +5,7 @@ import java.awt.*;
 
 import fidocadj.layers.LayerDesc;
 import fidocadj.graphic.swing.ColorSwing;
+import fidocadj.globals.Globals;
 
 /**
  * LayerRenderer.java
@@ -31,7 +32,7 @@ import fidocadj.graphic.swing.ColorSwing;
  * along with FidoCadJ. If not,
  * @see<a href=http://www.gnu.org/licenses/>http://www.gnu.org/licenses/</a>.
  *
- * Copyright 2015-2023 by Davide Bucci
+ * Copyright 2015-2025 by Davide Bucci
  * </pre>
  *
  * @author Manuel Finessi
@@ -49,17 +50,15 @@ public final class LayerCellRenderer extends JPanel implements
     /**
      * Constructs a LayerRenderer.
      */
-    public LayerCellRenderer() {
+    public LayerCellRenderer()
+    {
         setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         colorLabel = new JLabel();
         visibilityLabel = new JLabel();
         nameLabel = new JLabel();
 
-        visibleIcon = new ImageIcon(
-                getClass().getResource("/icons/layer-on.png"));
-
-        invisibleIcon = new ImageIcon(
-                getClass().getResource("/icons/layer-off.png"));
+        visibleIcon = Globals.loadIcon("/icons/layer-on.png");
+        invisibleIcon = Globals.loadIcon("/icons/layer-off.png");
 
         add(colorLabel);
         add(visibilityLabel);
@@ -94,7 +93,6 @@ public final class LayerCellRenderer extends JPanel implements
         visibilityLabel.setPreferredSize(new Dimension(iconSize, iconSize));
 
         nameLabel.setText(layer.getDescription());
-        nameLabel.setForeground(Color.BLACK);
 
         if (!layer.isVisible())
             nameLabel.setForeground(SystemColor.textInactiveText);
@@ -106,6 +104,9 @@ public final class LayerCellRenderer extends JPanel implements
             setBackground(list.getBackground());
             setForeground(list.getForeground());
         }
+
+        nameLabel.setForeground(getForeground());
+
 
         return this;
     }

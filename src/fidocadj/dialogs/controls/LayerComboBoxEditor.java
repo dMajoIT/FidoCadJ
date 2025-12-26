@@ -21,6 +21,7 @@ import fidocadj.circuit.CircuitPanel;
 import fidocadj.dialogs.DialogEditLayer;
 import fidocadj.graphic.swing.ColorSwing;
 import fidocadj.layers.LayerDesc;
+import fidocadj.globals.Globals;
 
 /**
  * LayerEditor.java
@@ -47,7 +48,7 @@ import fidocadj.layers.LayerDesc;
  * along with FidoCadJ. If not,
  * @see<a href=http://www.gnu.org/licenses/>http://www.gnu.org/licenses/</a>.
  *
- * Copyright 2015-2023 by Davide Bucci
+ * Copyright 2015-2025 by Davide Bucci
  * </pre>
  *
  * @author Manuel Finessi
@@ -83,11 +84,9 @@ public final class LayerComboBoxEditor extends AbstractCellEditor implements
         visibilityLabel = new JLabel();
         nameLabel = new JLabel();
 
-        visibleIcon = new ImageIcon(
-                getClass().getResource("/icons/layer-on.png"));
+        visibleIcon = Globals.loadIcon("/icons/layer-on.png");
+        invisibleIcon = Globals.loadIcon("/icons/layer-off.png");
 
-        invisibleIcon = new ImageIcon(
-                getClass().getResource("/icons/layer-off.png"));
 
         colorLabel.setCursor(
                 Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
