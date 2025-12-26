@@ -839,6 +839,22 @@ public final class FidoFrame extends JFrame implements
         if(circuitPanel.getDrawingModel().isEmpty())
             return;
         //double oldz=cc.getMapCoordinates().getXMagnitude();
+        
+        // Check for ghost primitives (hidden outside the drawing area)
+        if (circuitPanel.checkGhostPrimitives()) {
+            int response = JOptionPane.showConfirmDialog(this,
+                    Globals.messages.getString("GhostPrimitivesFound") + "\n"
+                    + Globals.messages.getString(
+                            "GhostPrimitivesTranslatePrompt"),
+                    Globals.messages.getString("GhostPrimitivesTitle"),
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if (response == JOptionPane.YES_OPTION) {
+                // Normalize the coordinates if user clicks 'Yes'
+                circuitPanel.normalizeCoordinates();
+            }
+        }
 
         // We calculate the zoom to fit factor here.
         MapCoordinates m=DrawingSize.calculateZoomToFit(
