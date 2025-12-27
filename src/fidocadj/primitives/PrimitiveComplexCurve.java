@@ -244,6 +244,10 @@ public final class PrimitiveComplexCurve
     */
     public CurveStorage createComplexCurve(MapCoordinates coordSys)
     {
+        // A spline needs at least two points
+        if (nPoints < 2) {
+            return null;
+        }
 
         double [] xPoints = new double[nPoints];
         double [] yPoints = new double[nPoints];
