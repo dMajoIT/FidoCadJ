@@ -2,7 +2,8 @@ package fidocadj.graphic.swing;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.awt.image.*;    // Used in drawGrid
+import java.awt.image.*;
+import java.util.*;
 
 import fidocadj.geom.MapCoordinates;
 import fidocadj.globals.Globals;
@@ -13,8 +14,6 @@ import fidocadj.graphic.PolygonInterface;
 import fidocadj.graphic.ShapeInterface;
 import fidocadj.graphic.TextInterface;
 import fidocadj.graphic.GraphicsInterface;
-
-
 
 /** This class maps the general interface to java.awt.Graphics2D.
     It also provides a method to draw grid. It turns out that it is not
@@ -39,7 +38,8 @@ import fidocadj.graphic.GraphicsInterface;
     along with FidoCadJ. If not,
     @see <a href=http://www.gnu.org/licenses/>http://www.gnu.org/licenses/</a>.
 
-    Copyright 2014-2023 by Davide Bucci
+    Copyright 2014-2025 by Davide Bucci
+    Performance optimizations 2025, Manuel Finessi
 </pre>
 */
 
@@ -54,10 +54,46 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
 
     Graphics2D g;
 
+    // Grid rendering optimization: cache for texture paints
+    private static class GridCacheEntry 
+    {
+        TexturePaint texturePaint;
+        BufferedImage image;
+        double zoom;
+        int width;
+        int height;
+        long lastUsed;
+        
+        GridCacheEntry(TexturePaint tp, BufferedImage img, 
+                double z, int w, int h) 
+        {
+            this.texturePaint = tp;
+            this.image = img;
+            this.zoom = z;
+            this.width = w;
+            this.height = h;
+            this.lastUsed = System.currentTimeMillis();
+        }
+    }
+    
+    // Cache for grid textures to avoid recreating them on every redraw
+    private Map<String, GridCacheEntry> gridCache = 
+            new LinkedHashMap<String, GridCacheEntry>(16, 0.75f, true) 
+    {
+        private static final int MAX_CACHE_SIZE = 10;
+        
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, 
+                GridCacheEntry> eldest) 
+        {
+            return size() > MAX_CACHE_SIZE;
+        }
+    };
+
     // Here are some other local variables made global for avoiding memory
     // allocations (used in drawGrid).
     private BufferedImage bufferedImage; // Useful for grid calculation
-    private double oldZoom;              // TODO: maybe the same as actualZoom?
+    //private double oldZoom;            // TODO: maybe the same as actualZoom?
     private TexturePaint tp;
     private int width;                   // NOPMD (complains -> local variable)
     private int height;                  // NOPMD (complains -> local variable)
@@ -98,7 +134,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
     public Graphics2DSwing(Graphics2D gg)
     {
         g=gg;
-        oldZoom = -1;
+        //oldZoom = -1;
         actualZoom = -1;
         zoom=1;
         selectedColor = Color.GREEN;
@@ -120,17 +156,10 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
     public Graphics2DSwing(Graphics gg)
     {
         g=(Graphics2D)gg;
-        oldZoom = -1;
+        //oldZoom = -1;
         actualZoom = -1;
         zoom=1;
         selectedColor = Color.GREEN;
-        /* Is that useful??? */
-        /*g.setRenderingHint(
-            RenderingHints.KEY_FRACTIONALMETRICS,
-            RenderingHints.VALUE_FRACTIONALMETRICS_ON);*/
-        /*g.setRenderingHint(
-            RenderingHints.KEY_TEXT_ANTIALIASING,
-            RenderingHints.VALUE_TEXT_ANTIALIASING_ON);*/
     }
 
     /** Constructor: fabricate a new object without associating a graphic
@@ -141,7 +170,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
     public Graphics2DSwing()
     {
         g=null;
-        oldZoom = -1;
+        //oldZoom = -1;
         actualZoom = -1;
         zoom=1;
         selectedColor = Color.GREEN;
@@ -273,6 +302,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
     {
         g.drawRect(x,y,width,height);
     }
+    
     /** Fill a rectangle on the current graphic context.
         @param x the x coordinate of the uppermost left corner
         @param y the y coordinate of the uppermost left corner
@@ -292,12 +322,8 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         @param arcWidth the width of the arc of the round corners
         @param arcHeight the height of the arc of the round corners
     */
-    public void fillRoundRect(int x,
-                                   int y,
-                                   int width,
-                                   int height,
-                                   int arcWidth,
-                                   int arcHeight)
+    public void fillRoundRect(int x, int y, int width, int height,
+                              int arcWidth, int arcHeight)
     {
         g.fillRoundRect(x,y,width,height,arcWidth,arcHeight);
     }
@@ -313,10 +339,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         @param height the height of the rectangle of the rectangle.
         @return true if the rectangle hits the dirty region.
     */
-    public boolean hitClip(int x,
-                       int y,
-                       int width,
-                       int height)
+    public boolean hitClip(int x, int y, int width, int height)
     {
         return g.hitClip(x,y,width,height);
     }
@@ -327,10 +350,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         @param x2 second coordinate x value.
         @param y2 second coordinate y value.
     */
-    public void drawLine(int x1,
-                              int y1,
-                              int x2,
-                              int y2)
+    public void drawLine(int x1, int y1, int x2, int y2)
     {
         g.drawLine(x1,y1,x2,y2);
     }
@@ -367,6 +387,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
     {
         setFont(name, size, false, false);
     }
+    
     /** Get the font size.
         @return the font size.
     */
@@ -424,9 +445,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         @param x the x coordinate of the starting point.
         @param y the y coordinate of the starting point.
     */
-    public void drawString(String str,
-                                int x,
-                                int y)
+    public void drawString(String str, int x, int y)
     {
         g.drawString(str,x,y);
     }
@@ -447,10 +466,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         @param width the width of the oval.
         @param height the height of the oval.
     */
-    public void fillOval(int x,
-                              int y,
-                              int width,
-                              int height)
+    public void fillOval(int x, int y, int width, int height)
     {
         g.fillOval(x,y,width,height);
     }
@@ -461,10 +477,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         @param width the width of the oval.
         @param height the height of the oval.
     */
-    public void drawOval(int x,
-                              int y,
-                              int width,
-                              int height)
+    public void drawOval(int x, int y, int width, int height)
     {
         g.drawOval(x,y,width,height);
     }
@@ -526,6 +539,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
             AlphaComposite.SRC_OVER, 1.0f));
 
     }
+    
     /**
         Blend two colors. From
      http://www.java2s.com/Code/Java/2D-Graphics-GUI/Commoncolorutilities.htm
@@ -669,7 +683,154 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         g.setTransform(ats);
     }
 
+    /** Generate a cache key for grid texture based on current parameters.
+        @param z the zoom level
+        @param dx the horizontal grid step
+        @param dy the vertical grid step
+        @param width the texture width
+        @param height the texture height
+        @return a unique string key for caching
+    */
+    private String generateGridCacheKey(double z, int dx, int dy, 
+            int width, int height)
+    {
+        // Round zoom to 3 decimal places to avoid excessive cache entries
+        // for imperceptible zoom differences
+        return String.format("%.3f_%d_%d_%d_%d", z, dx, dy, width, height);
+    }
+
+    /** Check if we need to recreate the grid texture or can reuse cached one.
+        @param z the current zoom level
+        @param dx the horizontal grid step
+        @param dy the vertical grid step
+        @param width the desired texture width
+        @param height the desired texture height
+        @return true if texture needs to be recreated
+    */
+    private boolean shouldRecreateGridTexture(double z, int dx, int dy, 
+            int width, int height)
+    {
+        String cacheKey = generateGridCacheKey(z, dx, dy, width, height);
+        GridCacheEntry cached = gridCache.get(cacheKey);
+        
+        // If we have a valid cached entry, reuse it
+        if (cached != null) {
+            this.tp = cached.texturePaint;
+            this.bufferedImage = cached.image;
+            this.width = cached.width;
+            this.height = cached.height;
+            //this.oldZoom = cached.zoom;
+            return false;
+        }
+        
+        return true;
+    }
+
+    /** Create and cache a new grid texture.
+        @param cs the coordinate map description
+        @param dx the horizontal grid step in logical units
+        @param dy the vertical grid step in logical units
+        @param mul the multiplier for the pattern size
+        @param z the zoom level
+        @param colorDots the color for grid dots
+    */
+    private void createGridTexture(MapCoordinates cs, int dx, int dy, 
+                                   int mul, double z, ColorInterface colorDots)
+    {
+        // Calculate texture dimensions
+        width = Math.abs(cs.mapX(mul*dx,0)-cs.mapX(0,0));
+        if (width <= 0) {
+            width = 1;
+        }
+
+        height = Math.abs(cs.mapY(0,0)-cs.mapY(0,mul*dy));
+        if (height <= 0) {
+            height = 1;
+        }
+
+        try {
+            // Create a buffered image in which to draw
+            GraphicsEnvironment env =
+                GraphicsEnvironment.getLocalGraphicsEnvironment();
+            
+            GraphicsDevice device = env.getDefaultScreenDevice();
+            
+            GraphicsConfiguration config = device.getDefaultConfiguration();
+            
+            bufferedImage = config.createCompatibleImage(width, height,
+                                      Transparency.TRANSLUCENT);
+
+        } catch (OutOfMemoryError e) {
+            System.out.println("Out of memory error when painting grid");
+            return;
+        }
+
+        // Create a graphics contents on the buffered image
+        Graphics2D g2d = bufferedImage.createGraphics();
+        ColorSwing clrd = (ColorSwing) colorDots;
+        g2d.setColor(clrd.getColorSwing());
+
+        double dd = 0; // DB: I tried with d/2 instead of 0, but I get some very
+                       // unpleasant aliasing effects for zoom such as 237%
+        double d = 1;
+
+        // Pre-calculate all X coordinates to avoid repeated ..
+        // coordinate transformations.
+        int numXPoints = (int)(cs.unmapXsnap(width) / dx) + 2;
+        double[] xCoords = new double[numXPoints];
+        int xIdx = 0;
+        
+        for (double x = 0; x <= cs.unmapXsnap(width) && 
+                xIdx < numXPoints; x += dx) 
+        {
+            xCoords[xIdx++] = cs.mapXr(x, 0);
+        }
+
+        // Pre-calculate all Y coordinates
+        int numYPoints = (int)(cs.unmapYsnap(height) / dy) + 2;
+        double[] yCoords = new double[numYPoints];
+        int yIdx = 0;
+        
+        for (double y = 0; y <= cs.unmapYsnap(height) && 
+                yIdx < numYPoints; y += dy) 
+        {
+            yCoords[yIdx++] = cs.mapYr(0, y);
+        }
+
+        // Draw the grid using pre-calculated coordinates
+        for (int i = 0; i < xIdx; i++) {
+            for (int j = 0; j < yIdx; j++) {
+                g2d.fillRect(
+                    (int)Math.round(xCoords[i] - dd),
+                    (int)Math.round(yCoords[j] - dd),
+                    (int)d, (int)d
+                );
+            }
+        }
+
+        g2d.dispose();
+
+        //oldZoom = z;
+        Rectangle anchor = new Rectangle(width, height);
+        tp = new TexturePaint(bufferedImage, anchor);
+
+        // Store in cache
+        String cacheKey = generateGridCacheKey(z, dx, dy, width, height);
+        
+        gridCache.put(cacheKey, new GridCacheEntry(tp, bufferedImage, 
+                z, width, height));
+    }
+
     /** Draw the grid in the given graphic context.
+        OPTIMIZED VERSION: This method uses several performance optimizations:
+        - Caching of texture paints to avoid recreating them
+        - Pre-calculation of coordinates to minimize transformation calls
+        - Smart fallback strategies for different grid densities
+        - Efficient line drawing for large pitch grids
+        
+        This is the interface-compliant version that delegates to the optimized
+        internal implementation.
+        
         @param cs the coordinate map description
         @param xmin the x (screen) coordinate of the upper left corner
         @param ymin the y (screen) coordinate of the upper left corner
@@ -678,140 +839,182 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
         @param colorDots the color for dot grid
         @param colorLines the color for lines grid
     */
-    public void drawGrid(MapCoordinates cs,int xmin, int ymin, int xmax,
+    public void drawGrid(MapCoordinates cs, int xmin, int ymin, int xmax,
             int ymax, ColorInterface colorDots, ColorInterface colorLines)
+    {
+        // Delegate to the internal optimized implementation
+        drawGridOptimized(cs, xmin, ymin, xmax, ymax, colorDots, colorLines);
+    }
+
+    /** Internal optimized implementation of grid drawing.
+        This method contains all the performance optimizations.
+        
+        @param cs the coordinate map description
+        @param xmin the x (screen) coordinate of the upper left corner
+        @param ymin the y (screen) coordinate of the upper left corner
+        @param xmax the x (screen) coordinate of the bottom right corner
+        @param ymax the y (screen) coordinate of the bottom right corner
+        @param colorDots the color for dot grid
+        @param colorLines the color for lines grid
+    */
+    private void drawGridOptimized(MapCoordinates cs, 
+                        int xmin, int ymin, 
+                        int xmax, int ymax, 
+                        ColorInterface colorDots, ColorInterface colorLines)
     {
         // Drawing the grid seems easy, but it appears that setting a pixel
         // takes a lot of time. Basically, we create a textured brush and we
         // use it to paint the entire specified region.
-        int dx=cs.getXGridStep();   // Horizontal grid pitch in logical units.
-        int dy=cs.getYGridStep();   // Vertical grid pitch in logical units.
-        int mul=1;
-        double toll=0.01;
-        double z=cs.getYMagnitude();
+        int dx = cs.getXGridStep();   // Horizontal grid pitch in logical units.
+        int dy = cs.getYGridStep();   // Vertical grid pitch in logical units.
+        int mul = 1;
+        double toll = 0.01;
+        double z = cs.getYMagnitude();
 
-        // DB: I tried with d/2 instead of 0, but I get some very
-        // unpleasant aliasing effects for zoom such as 237%
-        double dd=0;
+        double ddx = Math.abs(cs.mapXi(dx, 0, false) - cs.mapXi(0, 0, false));
+        double ddy = Math.abs(cs.mapYi(0, dy, false) - cs.mapYi(0, 0, false));
 
-        double x;
-        double y;
-
-        // Fabricate a new image only if necessary, to save time.
-        if(oldZoom!=z || bufferedImage == null || tp==null) {
-            // It turns out that drawing the grid in an efficient way is not a
-            // trivial task. The program here tries to calculate the minimum
-            // common integer multiple of the dot espacement, to calculate the
-            // size of an image in order to be an integer.
-            // The pattern filling (which is fast) is then used to replicate the
-            // image (very fast!) over the working surface.
-
-            for (int l=1; l<105; ++l) {
-                if (Math.abs(l*z-Math.round(l*z))<toll) {
-                    mul=l;
-                    break;
-                }
+        // Use line rendering for large grid pitch.
+        // This code applies a correction: draws lines if the pitch
+        // is very large, or draw much less dots if it is too dense.
+        if (ddx > 35 || ddy > 35) {
+            // Lines! This is the fastest approach for widely spaced grids
+            ColorSwing clrl = (ColorSwing)colorLines;
+            g.setColor(clrl.getColorSwing());
+            
+            // Pre-calculate all X coordinates to avoid 
+            // repeated unmapXsnap/mapXr calls in the loop
+            java.util.List<Integer> xCoords = new java.util.ArrayList<>();
+            for (double x = cs.unmapXsnap(xmin); 
+                    x <= cs.unmapXsnap(xmax); x += dx) {
+                xCoords.add((int)Math.round(cs.mapXr(x, 0)));
             }
-            tp = null;
-            double ddx=Math.abs(cs.mapXi(dx,0,false)-cs.mapXi(0,0,false));
-            double ddy=Math.abs(cs.mapYi(0,dy,false)-cs.mapYi(0,0,false));
-            double d=1;
-
-            // This code applies a correction: draws lines if the pitch
-            // is very large, or draw much less dots if it is too dense.
-            if (ddx>35 || ddy>35) {
-                // Lines!
-                bufferedImage=null;
-                d=2;
-                // The loops are done in logical units.
-                ColorSwing clrl = (ColorSwing)colorLines;
-                g.setColor(clrl.getColorSwing());
-                for (x=cs.unmapXsnap(xmin); x<=cs.unmapXsnap(xmax); x+=dx) {
-                    g.drawLine(
-                        (int)Math.round(cs.mapXr(x,0)),ymin,
-                        (int)Math.round(cs.mapXr(x,0)), ymax);
-                }
-                for (y=cs.unmapYsnap(ymin); y<=cs.unmapYsnap(ymax); y+=dy) {
-                    g.drawLine(
-                        xmin,(int)Math.round(cs.mapYr(0,y)),
-                        xmax, (int)Math.round(cs.mapYr(0,y)));
-                }
-                return;
-            } else if (ddx<3 || ddy <3) {
-                // Less dots
-                dx=5*cs.getXGridStep();
-                dy=5*cs.getYGridStep();
-                ddx=Math.abs(cs.mapXi(dx,0,false)-cs.mapXi(0,0,false));
+            
+            // Draw vertical lines using pre-calculated coordinates
+            for (Integer xCoord : xCoords) {
+                g.drawLine(xCoord, ymin, xCoord, ymax);
             }
-
-            width=Math.abs(cs.mapX(mul*dx,0)-cs.mapX(0,0));
-            if (width<=0) {
-                width=1;
+            
+            // Pre-calculate and draw horizontal lines
+            java.util.List<Integer> yCoords = new java.util.ArrayList<>();
+            for (double y = cs.unmapYsnap(ymin); 
+                    y <= cs.unmapYsnap(ymax); y += dy) {
+                yCoords.add((int)Math.round(cs.mapYr(0, y)));
             }
-
-            height=Math.abs(cs.mapY(0,0)-cs.mapY(0,mul*dy));
-            if (height<=0) {
-                height=1;
+            
+            for (Integer yCoord : yCoords) {
+                g.drawLine(xmin, yCoord, xmax, yCoord);
             }
-
-            /* Nowadays computers have generally a lot of memory, but this is
-               not a good reason to waste it. If it turns out that the image
-               size is utterly impratical, use the standard dot by dot grid
-               construction.
-               This should happen rarely, only for particular zoom sizes.
-            */
-            if (width>maxAllowableGridBrushWidth ||
-                height>maxAllowableGridBrushHeight)
-            {
-                // Simpler (and generally less efficient) version of the grid
-                ColorSwing clrd = (ColorSwing) colorDots;
-                g.setColor(clrd.getColorSwing());
-                for (x=cs.unmapXsnap(xmin); x<=cs.unmapXsnap(xmax); x+=dx) {
-                    for (y=cs.unmapYsnap(ymin); y<=cs.unmapYsnap(ymax); y+=dy) {
-                        g.fillRect((int)Math.round(cs.mapXr(x,y)-dd),
-                            (int)Math.round(cs.mapYr(x,y)-dd),(int)d,(int)d);
-                    }
-                }
-                return;
-            }
-
-            try {
-                // Create a buffered image in which to draw
-                GraphicsEnvironment env =
-                    GraphicsEnvironment.getLocalGraphicsEnvironment();
-                GraphicsDevice device = env.getDefaultScreenDevice();
-                GraphicsConfiguration config = device.getDefaultConfiguration();
-                bufferedImage = config.createCompatibleImage(width, height,
-                                          Transparency.TRANSLUCENT);
-
-            } catch (OutOfMemoryError e) {
-                System.out.println("Out of memory error when painting grid");
-                return;
-            }
-
-            // Create a graphics contents on the buffered image
-            Graphics2D g2d = bufferedImage.createGraphics();
-            g2d.setColor(Color.white);
-            ColorSwing clrd = (ColorSwing) colorDots;
-            g2d.setColor(clrd.getColorSwing());
-            g.setColor(clrd.getColorSwing());
-
-            // Prepare the image with the grid.
-            for (x=0; x<=cs.unmapXsnap(width); x+=dx) {
-                for (y=0; y<=cs.unmapYsnap(height); y+=dy) {
-                    g2d.fillRect((int)Math.round(cs.mapXr(x,y)-dd),
-                        (int)Math.round(cs.mapYr(x,y)-dd),(int)d,(int)d);
-                }
-            }
-            oldZoom=z;
-            Rectangle anchor = new Rectangle(width, height);
-
-            tp = new TexturePaint(bufferedImage, anchor);
+            
+            return;
+        }
+        
+        // Reduce grid density when it's too fine
+        if (ddx < 3 || ddy < 3) {
+            // Less dots - multiply pitch by 5 to make grid sparser
+            dx = 5 * cs.getXGridStep();
+            dy = 5 * cs.getYGridStep();
+            ddx = Math.abs(cs.mapXi(dx, 0, false) - cs.mapXi(0, 0, false));
         }
 
-        // Textured paint :-)
-        g.setPaint(tp);
-        g.fillRect(0, 0, xmax, ymax);   // TODO: sometimes I get an exception.
+        // Calculate optimal texture pattern size.
+        // It turns out that drawing the grid in an efficient way is not a
+        // trivial task. The program here tries to calculate the minimum
+        // common integer multiple of the dot espacement, to calculate the
+        // size of an image in order to be an integer.
+        // The pattern filling (which is fast) is then used to replicate the
+        // image (very fast!) over the working surface.
+        for (int l = 1; l < 105; ++l) {
+            if (Math.abs(l * z - Math.round(l * z)) < toll) {
+                mul = l;
+                break;
+            }
+        }
+
+        // Calculate the required texture size
+        int reqWidth = Math.abs(cs.mapX(mul*dx, 0) - cs.mapX(0, 0));
+        if (reqWidth <= 0) {
+            reqWidth = 1;
+        }
+
+        int reqHeight = Math.abs(cs.mapY(0, 0) - cs.mapY(0, mul*dy));
+        if (reqHeight <= 0) {
+            reqHeight = 1;
+        }
+
+        /* Smart fallback for oversized textures.
+           Nowadays computers have generally a lot of memory, but this is
+           not a good reason to waste it. If it turns out that the image
+           size is utterly impractical, use the standard dot by dot grid
+           construction.
+           This should happen rarely, only for particular zoom sizes.
+        */
+        if (reqWidth > maxAllowableGridBrushWidth ||
+            reqHeight > maxAllowableGridBrushHeight)
+        {
+            // Simpler (and generally less efficient) version of the grid
+            // Use this as fallback when texture would be too large
+            ColorSwing clrd = (ColorSwing) colorDots;
+            g.setColor(clrd.getColorSwing());
+            
+            double dd = 0;
+            double d = 1;
+            
+            // to avoid repeated transformations
+            java.util.List<Double> xPositions = new java.util.ArrayList<>();
+            for (double x = cs.unmapXsnap(xmin); 
+                    x <= cs.unmapXsnap(xmax); x += dx) {
+                xPositions.add(x);
+            }
+            
+            java.util.List<Double> yPositions = new java.util.ArrayList<>();
+            for (double y = cs.unmapYsnap(ymin); 
+                    y <= cs.unmapYsnap(ymax); y += dy) {
+                yPositions.add(y);
+            }
+            
+            // Draw grid dots using pre-calculated positions
+            for (Double x : xPositions) {
+                for (Double y : yPositions) {
+                    g.fillRect(
+                        (int)Math.round(cs.mapXr(x, y) - dd),
+                        (int)Math.round(cs.mapYr(x, y) - dd),
+                        (int)d, (int)d
+                    );
+                }
+            }
+            return;
+        }
+
+        // Check if we can reuse a cached texture paint
+        if (shouldRecreateGridTexture(z, dx, dy, reqWidth, reqHeight)) {
+            // Need to create new texture
+            createGridTexture(cs, dx, dy, mul, z, colorDots);
+        }
+
+        // Apply the cached or newly created texture paint
+        if (tp != null) {
+            g.setPaint(tp);
+            g.fillRect(0, 0, xmax, ymax);
+        }
+    }
+
+    /** Clear the grid texture cache. 
+        This can be called to free memory when needed.
+    */
+    public void clearGridCache()
+    {
+        gridCache.clear();
+        bufferedImage = null;
+        tp = null;
+    }
+
+    /** Get the current size of the grid cache.
+        @return the number of cached grid textures
+    */
+    public int getGridCacheSize()
+    {
+        return gridCache.size();
     }
 
     /** Create a polygon object, compatible with Graphics2DSwing.
@@ -829,6 +1032,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
     {
         return new ShapeSwing();
     }
+    
     /** Create a color object, compatible with Graphics2DSwing.
         @return a color object (instance of ColorSwing).
     */
@@ -836,6 +1040,7 @@ public class Graphics2DSwing implements GraphicsInterface, TextInterface
     {
         return new ColorSwing(g.getColor());
     }
+    
     /** Retrieve the current screen density in dots-per-inch.
         @return the screen resolution (density) in dots-per-inch.
     */
