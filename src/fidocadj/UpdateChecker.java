@@ -137,21 +137,93 @@ public class UpdateChecker
         BufferedReader reader = null;
 
         try {
+            // Enable TLS 1.2 explicitly (required by GitHub)
+            System.setProperty("https.protocols", "TLSv1.2,TLSv1.3");
+
             URL url = new URL(RELEASES_URL);
             connection = (HttpURLConnection) url.openConnection();
+
+            // If it's an HTTPS connection, configure SSL
+            if (connection instanceof javax.net.ssl.HttpsURLConnection) {
+                javax.net.ssl.HttpsURLConnection httpsConnection = 
+                        (javax.net.ssl.HttpsURLConnection) connection;
+
+                // Create SSL context with TLS 1.2
+                javax.net.ssl.SSLContext sslContext = 
+                        javax.net.ssl.SSLContext.getInstance("TLSv1.2");
+                sslContext.init(null, null, new java.security.SecureRandom());
+
+                httpsConnection.setSSLSocketFactory(
+                            sslContext.getSocketFactory());
+            }
+
             connection.setRequestMethod("GET");
+
+            // Enable automatic redirect following
+            connection.setInstanceFollowRedirects(true);
+
             connection.setConnectTimeout(TIMEOUT_MS);
             connection.setReadTimeout(TIMEOUT_MS);
-            connection.setRequestProperty(
-                    "User-Agent", "FidoCadJ-UpdateChecker");
+
+            // Use a more common User-Agent to avoid potential blocking
+            connection.setRequestProperty("User-Agent", 
+                    "Mozilla/5.0 (compatible; FidoCadJ-UpdateChecker)");
+
+            // Add Accept header for better compatibility
+            connection.setRequestProperty("Accept", 
+                    "text/html,application/xhtml+xml," +
+                            "application/xml;q=0.9,*/*;q=0.8");
 
             int responseCode = connection.getResponseCode();
+
+            // Manual redirect handling for systems where ..
+            // automatic redirect fails
+            if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || 
+                responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
+                responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
+
+                String newUrl = connection.getHeaderField("Location");
+                connection.disconnect();
+
+                // Follow the redirect
+                connection = (HttpURLConnection) new URL(newUrl)
+                        .openConnection();
+
+                // Reconfigure SSL for the redirected connection
+                if (connection instanceof javax.net.ssl.HttpsURLConnection) {
+                    javax.net.ssl.HttpsURLConnection httpsConnection = 
+                            (javax.net.ssl.HttpsURLConnection) connection;
+
+                    javax.net.ssl.SSLContext sslContext = 
+                            javax.net.ssl.SSLContext.getInstance("TLSv1.2");
+                    sslContext.init(null, null, 
+                            new java.security.SecureRandom());
+
+                    httpsConnection.setSSLSocketFactory(
+                            sslContext.getSocketFactory());
+                }
+
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(TIMEOUT_MS);
+                connection.setReadTimeout(TIMEOUT_MS);
+                connection.setRequestProperty("User-Agent", 
+                        "Mozilla/5.0 (compatible; FidoCadJ-UpdateChecker)");
+                connection.setRequestProperty("Accept", 
+                        "text/html,application/xhtml+xml," +
+                                "application/xml;q=0.9,*/*;q=0.8");
+
+                responseCode = connection.getResponseCode();
+            }
+
+            // Check if the request was successful
             if (responseCode != 200) {
+                // System.err.println("HTTP response code: " + responseCode);
                 return null;
             }
 
+            // Read the response content
             reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream()));
+                    new InputStreamReader(connection.getInputStream(), "UTF-8"));
 
             StringBuilder content = new StringBuilder();
             String line;
@@ -160,14 +232,26 @@ public class UpdateChecker
                 content.append(line).append("\n");
             }
 
+            // System.out.println("Content length: " + content.length());
+            // System.out.println("First 500 chars: " + 
+            //     content.substring(0, Math.min(500, content.length())));
+
             return parseLatestVersion(content.toString());
 
         } catch (Exception e) {
+            System.err.println("Error fetching latest version: " + 
+                      e.getMessage());
+            //e.printStackTrace();
             return null;
         } finally {
+            // Clean up resources
             try {
-                if (reader != null) reader.close();
-                if (connection != null) connection.disconnect();
+                if (reader != null) {
+                    reader.close();
+                }
+                if (connection != null) {
+                    connection.disconnect();
+                }
             } catch (Exception e) {
                 // Ignore cleanup errors
             }
