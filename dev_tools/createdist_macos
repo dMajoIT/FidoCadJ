@@ -2,5 +2,18 @@
 
 jpackage_command=jpackage
 
+echo NOTE: launch this script from the main directory
+echo Create the usual jar file
 make createjar
-$jpackage_command -i jar/ -n FidoCadJ --icon FidoCadJ.icns  --copyright "Davide Bucci, Manuel Finessi and many others"   --description "A multiplatform vector drawing software" --main-class fidocadj.FidoMain   --app-version 1.24.9 --main-jar fidocadj.jar
+echo Create the package for macOS
+$jpackage_command --input jar/ \
+     --name "FidoCadJ" \
+     --icon OSes/mac/mac-resources/FidoCadJ.icns \
+     --resource-dir OSes/mac/mac-resources/ \
+     --copyright "Davide Bucci, Manuel Finessi and many others" \
+     --description "A multiplatform vector drawing software" \
+     --main-class fidocadj.FidoMain \
+     --app-version 1.24.9 \
+     --about-url https://github.com/FidoCadJ/FidoCadJ \
+     --file-associations dev_tools/file_associations_macOS.properties \
+     --main-jar fidocadj.jar
