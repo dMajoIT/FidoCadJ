@@ -4,7 +4,7 @@ BODY {color: #CCC;
         -webkit-hyphens: auto;
         -moz-hyphens: auto;
       hyphens: auto;
-      background: black;
+      background: #111;
       font-size:100%;
       font-family: "lucida grande", verdana, arial, sans-serif;
       line-height:1.2em;
