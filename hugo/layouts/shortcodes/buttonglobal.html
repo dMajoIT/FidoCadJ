@@ -1,9 +1,0 @@
-{{- $paramName := (.Get 0) -}}
-{{- $siteParams := .Site.Params -}}
-{{- with $paramName -}}
-    {{- with $siteParams -}}
-        <a href="{{- index . (lower $paramName) -}}" rel="noopener" class="book-btn">
-          {{ $.Inner | markdownify }}
-        </a>
-    {{- end -}}
-{{- end -}}

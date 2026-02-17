@@ -1,0 +1,41 @@
+BODY {color: #CCC;
+      margin: 0.5em 0.5em 0.5em 0.5em;
+      text-align: justify;
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+      hyphens: auto;
+      background: black;
+      font-size:100%;
+      font-family: "lucida grande", verdana, arial, sans-serif;
+      line-height:1.2em;
+}
+
+H1 {line-height:1.1em; 
+    text-align: center;
+    color: #CCC;}
+
+A:link {color: #0D2;}
+
+A:visited {color: #0A1;}
+
+A:hover {color: #0F1;}
+
+
+
+IMG.float
+{
+    float: right;
+    margin: 0px 0px 0px 0px;
+    border: 0px solid;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 0px;
+    padding-left:15px;
+}
+
+IMG.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
